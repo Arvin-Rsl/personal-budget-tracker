@@ -58,22 +58,26 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   void _saveData() {
-    final file = _getLocalStorageFile();
-    // Convert our list of Transaction objects into a List of Maps (JSON format)
-    final List<Map<String, dynamic>> structuredData = _transactions
-        .map(
-          (transaction) => {
-            'id': transaction.id,
-            'description': transaction.description,
-            'amount': transaction.amount,
-            'date': transaction.date.toIso8601String(),
-            'categoryId': transaction.categoryId,
-          },
-        )
-        .toList();
+    try {
+      final file = _getLocalStorageFile();
+      // Convert our list of Transaction objects into a List of Maps (JSON format)
+      final List<Map<String, dynamic>> structuredData = _transactions
+          .map(
+            (transaction) => {
+              'id': transaction.id,
+              'description': transaction.description,
+              'amount': transaction.amount,
+              'date': transaction.date.toIso8601String(),
+              'categoryId': transaction.categoryId,
+            },
+          )
+          .toList();
 
-    // Encode the structured map data into a long single string text and write it
-    file.writeAsStringSync(jsonEncode(structuredData));
+      // Encode the structured map data into a long single string text and write it
+      file.writeAsStringSync(jsonEncode(structuredData));
+    } catch (error) {
+      debugPrint("Failed to write budget data to disk: $error");
+    }
   }
 }
 
