@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -57,7 +58,22 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   void _saveData() {
-    // TODO: converts all transactions into text format and saves them to the device
+    final file = _getLocalStorageFile();
+    // Convert our list of Transaction objects into a List of Maps (JSON format)
+    final List<Map<String, dynamic>> structuredData = _transactions
+        .map(
+          (transaction) => {
+            'id': transaction.id,
+            'description': transaction.description,
+            'amount': transaction.amount,
+            'date': transaction.date.toIso8601String(),
+            'categoryId': transaction.categoryId,
+          },
+        )
+        .toList();
+
+    // Encode the structured map data into a long single string text and write it
+    file.writeAsStringSync(jsonEncode(structuredData));
   }
 }
 
