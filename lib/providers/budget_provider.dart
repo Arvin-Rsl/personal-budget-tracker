@@ -79,6 +79,37 @@ class BudgetProvider extends ChangeNotifier {
       debugPrint("Failed to write budget data to disk: $error");
     }
   }
+
+  void _loadData() {
+    try {
+      final file = _getLocalStorageFile();
+
+      // Safety check: if the file doesn't exist yet (first-time launch), stop here
+      if (file.existsSync()) {
+        final String rawText = file.readAsStringSync();
+
+        // Convert the raw string text back into a dynamic Dart List of Maps
+        final List<dynamic> decodedData = jsonDecode(rawText);
+
+        // Reconstruct our structured Transaction objects from the map values
+        _transactions = decodedData
+            .map(
+              (item) => Transaction(
+                id: item['id'],
+                description: item['description'],
+                amount: (item['amount'] as num).toDouble(),
+                date: DateTime.parse(item['date']),
+                categoryId: item['categoryId'],
+              ),
+            )
+            .toList();
+
+        notifyListeners();
+      }
+    } catch (error) {
+      debugPrint("Failed to recover budget data from disk: $error");
+    }
+  }
 }
 
 // Locates a secure local system file address for persistent storage
