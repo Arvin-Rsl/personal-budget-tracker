@@ -51,9 +51,13 @@ class BudgetProvider extends ChangeNotifier {
 
     _transactions.add(newTransaction);
 
-    // TODO: add local data persistence save function
+    _saveData();
 
     notifyListeners();
+  }
+
+  void _saveData() {
+    // TODO: converts all transactions into text format and saves them to the device
   }
 }
 
