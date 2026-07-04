@@ -31,4 +31,26 @@ class BudgetProvider extends ChangeNotifier {
   double getRemainingBudget(Category category) {
     return category.allocatedBudget - getAmountSpentForCategory(category.id);
   }
+
+  void addTransaction(
+    String description,
+    double amount,
+    String categoryId,
+    DateTime selectedDate,
+  ) {
+    final newTransaction = Transaction(
+      // unique timestamp ID, for my (currently) offline local app
+      id: DateTime.now().toString(),
+      description: description,
+      amount: amount,
+      date: selectedDate,
+      categoryId: categoryId,
+    );
+
+    _transactions.add(newTransaction);
+
+    // TODO: add local data persistence save function
+
+    notifyListeners();
+  }
 }
