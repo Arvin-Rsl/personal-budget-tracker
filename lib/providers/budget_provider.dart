@@ -21,6 +21,10 @@ class BudgetProvider extends ChangeNotifier {
 
   List<Transaction> get transactions => _transactions;
 
+  BudgetProvider() {
+    _loadData();
+  }
+
   double getAmountSpentForCategory(String categoryId) {
     double total = 0;
     for (Transaction t in transactions) {
