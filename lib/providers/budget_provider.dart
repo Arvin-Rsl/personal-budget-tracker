@@ -19,8 +19,13 @@ class BudgetProvider extends ChangeNotifier {
   List<Transaction> get transactions => _transactions;
 
   double getAmountSpentForCategory(String categoryId) {
-    // TODO: calculate total spent for a specific category
-    return 0;
+    double total = 0;
+    for (Transaction t in transactions) {
+      if (t.categoryId == categoryId) {
+        total += t.amount;
+      }
+    }
+    return total;
   }
 
   double getRemainingBudget(Category category) {
