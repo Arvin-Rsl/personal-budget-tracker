@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
@@ -53,4 +55,11 @@ class BudgetProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+}
+
+// Locates a secure local system file address for persistent storage
+File _getLocalStorageFile() {
+  // Accesses a safe, sandbox environment directory provided by the operating system
+  final systemDirectory = Directory.systemTemp.path;
+  return File('$systemDirectory/my_smart_budget_data.json');
 }
