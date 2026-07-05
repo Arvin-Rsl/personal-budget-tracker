@@ -68,11 +68,11 @@ class HomeScreen extends StatelessWidget {
                       '\$${provider.getOverallRemainingBudget().toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.headlineLarge
                           ?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: provider.getOverallRemainingBudget() > 0
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.error,
-                      ),
+                            fontWeight: FontWeight.bold,
+                            color: provider.getOverallRemainingBudget() > 0
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.error,
+                          ),
                     ),
                     const SizedBox(height: 20),
 
@@ -129,7 +129,66 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // TODO: Implement Scrollable List of Categories with Progress Indicators
+            // Builds a vertical sequence of progress cards for every category
+            ListView.builder(
+              shrinkWrap: true,
+              // forces the list to adapt inside a SingleChildScrollView
+              physics: const NeverScrollableScrollPhysics(),
+              // disables nested scroll fights
+              itemCount: provider.categories.length,
+              itemBuilder: (context, index) {
+                final category = provider.categories[index];
+                final spent = provider.getAmountSpentForCategory(category.id);
+                final budget = category.allocatedBudget;
+
+                final double percentSpent = budget > 0
+                    ? (spent / budget).clamp(0.0, 1.0)
+                    : 0.0;
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              category.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '\$${spent.toStringAsFixed(0)} / \$${budget.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        LinearProgressIndicator(
+                          value: percentSpent,
+                          minHeight: 8,
+                          borderRadius: BorderRadius.circular(4),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
+                          color: percentSpent >= 1.0
+                              ? Theme.of(context).colorScheme.error
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
