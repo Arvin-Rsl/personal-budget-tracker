@@ -41,23 +41,24 @@ class _HomeScreenState extends State<HomeScreen> {
   // Track which month and year the user is currently inspecting
   DateTime _selectedMonth = DateTime.now();
 
+  static const MONTHS = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
   // Helper method to turn a month number into a readable word string
   String _getMonthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
+    return MONTHS[month - 1];
   }
 
   @override
@@ -87,22 +88,86 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.calendar_month, size: 28),
             tooltip: 'Change Month',
             onPressed: () async {
-              // Open native date picker but instruct user to pick a day to extract month/year
-              final DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: _selectedMonth,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-                helpText: 'SELECT MONTH & YEAR',
+              int selectedYear = _selectedMonth.year;
+              int selectedMonthNum = _selectedMonth.month;
+
+              // Generate a list of years dynamically (e.g., from 2020 to 2035)
+              final List<int> yearsList = List.generate(
+                16,
+                (index) => 2020 + index,
               );
 
-              if (picked != null) {
-                setState(() {
-                  _selectedMonth = picked;
-                });
-              }
+              await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return StatefulBuilder(
+                    builder: (context, setDialogState) {
+                      return AlertDialog(
+                        title: const Text('Select Month & Year'),
+                        content: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Month Picker Dropdown
+                            DropdownButton<int>(
+                              value: selectedMonthNum,
+                              items: List.generate(12, (index) {
+                                return DropdownMenuItem(
+                                  value: index + 1,
+                                  child: Text(MONTHS[index]),
+                                );
+                              }),
+                              onChanged: (int? newValue) {
+                                if (newValue != null) {
+                                  setDialogState(
+                                    () => selectedMonthNum = newValue,
+                                  );
+                                }
+                              },
+                            ),
+
+                            // Year Picker Dropdown
+                            DropdownButton<int>(
+                              value: selectedYear,
+                              items: yearsList.map((int year) {
+                                return DropdownMenuItem(
+                                  value: year,
+                                  child: Text(year.toString()),
+                                );
+                              }).toList(),
+                              onChanged: (int? newValue) {
+                                if (newValue != null) {
+                                  setDialogState(() => selectedYear = newValue);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedMonth = DateTime(
+                                  selectedYear,
+                                  selectedMonthNum,
+                                );
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              );
             },
           ),
+
           const Padding(padding: EdgeInsets.only(right: 8.0)),
         ],
       ),
