@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:personal_budget_app/providers/budget_provider.dart';
+import 'budget_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,8 +11,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Initialize BudgetState and set up MaterialApp theme config
-    return const SizedBox.shrink();
+    return BudgetState(
+      notifier: BudgetProvider(),
+      child: MaterialApp(
+        title: 'Personal Budget Tracker',
+        debugShowCheckedModeBanner: false, // hide the red development banner
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.teal,
+            brightness: Brightness.dark,
+          ),
+        ),
+        home: const HomeScreen(),
+      ),
+    );
   }
 }
 
