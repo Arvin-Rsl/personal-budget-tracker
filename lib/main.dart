@@ -47,7 +47,19 @@ class TransactionForm extends StatefulWidget {
 }
 
 class _TransactionFormState extends State<TransactionForm> {
-  // TODO: Define Input controllers and state properties for category selection
+  final _descriptionController = TextEditingController();
+  final _amountController = TextEditingController();
+
+  String? _selectedCategoryId;
+  DateTime _selectedDate = DateTime.now(); // default = current moment
+
+  @override
+  void dispose() {
+    // clean up controllers when the form is closed to prevent system memory leaks
+    _descriptionController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
