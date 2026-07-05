@@ -30,27 +30,90 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // Track which month and year the user is currently inspecting
+  DateTime _selectedMonth = DateTime.now();
+
+  // Helper method to turn a month number into a readable word string
+  String _getMonthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month - 1];
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = BudgetState.of(context);
 
+    final int targetYear = _selectedMonth.year;
+    final int targetMonth = _selectedMonth.month;
+
+    final double remaining = provider.getOverallRemainingBudgetForMonth(
+      targetYear,
+      targetMonth,
+    );
+    final double totalSpent = provider.getTotalSpentForMonth(
+      targetYear,
+      targetMonth,
+    );
+    final double totalBudget = provider.getTotalBudget();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Personal Budget Tracker'),
-        centerTitle: true,
+        title: Text('${_getMonthName(targetMonth)} $targetYear'),
+        centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month, size: 28),
+            tooltip: 'Change Month',
+            onPressed: () async {
+              // Open native date picker but instruct user to pick a day to extract month/year
+              final DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: _selectedMonth,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+                helpText: 'SELECT MONTH & YEAR',
+              );
+
+              if (picked != null) {
+                setState(() {
+                  _selectedMonth = picked;
+                });
+              }
+            },
+          ),
+          const Padding(padding: EdgeInsets.only(right: 8.0)),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // financial summary
+            // financial summary (monthly)
             Card(
-              elevation: 4, // a subtle, sleek shadow below the card frame
+              elevation: 4,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -63,24 +126,20 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
-                    // Displays the dynamically calculated remaining balance
                     Text(
-                      '\$${provider.getOverallRemainingBudget().toStringAsFixed(2)}',
+                      '\$${remaining.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.headlineLarge
                           ?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: provider.getOverallRemainingBudget() > 0
+                            color: remaining >= 0
                                 ? Theme.of(context).colorScheme.primary
                                 : Theme.of(context).colorScheme.error,
                           ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Divider line separating the main balance from the secondary totals row
                     const Divider(),
                     const SizedBox(height: 12),
 
-                    // Horizontal Row breaking down Total Budget allocation vs Total Spent costs
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -92,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '\$${provider.getTotalBudget().toStringAsFixed(2)}',
+                              '\$${totalBudget.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -108,7 +167,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '\$${provider.getTotalSpent().toStringAsFixed(2)}',
+                              '\$${totalSpent.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -122,6 +181,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
 
             const Text(
               'Monthly Expenses by Category',
@@ -129,16 +189,18 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Builds a vertical sequence of progress cards for every category
+            // Category progress track sequence (monthly)
             ListView.builder(
               shrinkWrap: true,
-              // forces the list to adapt inside a SingleChildScrollView
               physics: const NeverScrollableScrollPhysics(),
-              // disables nested scroll fights
               itemCount: provider.categories.length,
               itemBuilder: (context, index) {
                 final category = provider.categories[index];
-                final spent = provider.getAmountSpentForCategory(category.id);
+                final spent = provider.getAmountSpentForCategoryAndMonth(
+                  category.id,
+                  targetYear,
+                  targetMonth,
+                );
                 final budget = category.allocatedBudget;
 
                 final double percentSpent = budget > 0
