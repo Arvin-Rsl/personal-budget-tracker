@@ -161,7 +161,36 @@ class _TransactionFormState extends State<TransactionForm> {
           ),
           const SizedBox(height: 24),
 
-          // TODO: Implement Action Submission Button
+          // Submission trigger button
+          SizedBox(
+            width: double.infinity,
+            // Stretches the button horizontally across the full card width
+            child: FilledButton(
+              onPressed: () {
+                final String inputDescription = _descriptionController.text.trim();
+                final double? inputAmount = double.tryParse(_amountController.text);
+
+                if (inputAmount == null || inputAmount <= 0) {
+                  debugPrint('Invalid Amount!');
+                  return;
+                } else if (inputDescription.isEmpty) {
+                  debugPrint('Empty Description!');
+                  return;
+                }
+
+                provider.addTransaction(
+                  inputDescription,
+                  inputAmount,
+                  _selectedCategoryId!,
+                  _selectedDate,
+                );
+
+                // return the user to the dashboard
+                Navigator.of(context).pop();
+              },
+              child: const Text('Add Cost'),
+            ),
+          ),
         ],
       ),
     );
