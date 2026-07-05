@@ -49,6 +49,8 @@ class BudgetProvider extends ChangeNotifier {
     _loadData();
   }
 
+  // BEGINNING OF CALCULATIONS
+
   double getAmountSpentForCategory(String categoryId) {
     return _transactions
         .where((transaction) => transaction.categoryId == categoryId)
@@ -82,6 +84,27 @@ class BudgetProvider extends ChangeNotifier {
     }
     return totalRemainingBudget;
   }
+
+  double getTotalSpentForMonth(int year, int month) {
+    // TODO: Filter _transactions array and accumulate totals for matching month/year
+    return 0.0;
+  }
+
+  double getOverallRemainingBudgetForMonth(int year, int month) {
+    // TODO: Subtract monthly expenditures from global category allocations
+    return 0.0;
+  }
+
+  double getAmountSpentForCategoryAndMonth(
+    String categoryId,
+    int year,
+    int month,
+  ) {
+    // TODO: Filter transactions by matching category ID, year, and month
+    return 0.0;
+  }
+
+  // END OF CALCULATIONS
 
   void addTransaction(
     String description,
