@@ -324,7 +324,14 @@ class _HomeScreenState extends State<HomeScreen> {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder: (context) => const TransactionForm(),
+            builder: (context) => TransactionForm(
+              currentViewedMonth: _selectedMonth,
+              onDateChanged: (DateTime newMonthToView) {
+                setState(() {
+                  _selectedMonth = newMonthToView;
+                });
+              },
+            ),
           );
         },
         child: const Icon(Icons.add),
@@ -334,7 +341,14 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class TransactionForm extends StatefulWidget {
-  const TransactionForm({super.key});
+  final DateTime currentViewedMonth;
+  final ValueChanged<DateTime> onDateChanged;
+
+  const TransactionForm({
+    super.key,
+    required this.currentViewedMonth,
+    required this.onDateChanged,
+  });
 
   @override
   State<TransactionForm> createState() => _TransactionFormState();
@@ -358,6 +372,10 @@ class _TransactionFormState extends State<TransactionForm> {
   @override
   Widget build(BuildContext context) {
     final provider = BudgetState.of(context);
+    // Check if the currently chosen transaction date is outside the viewed month frame
+    final bool isDifferentMonth =
+        _selectedDate.year != widget.currentViewedMonth.year ||
+        _selectedDate.month != widget.currentViewedMonth.month;
 
     // default to the first available category ID if nothing is chosen yet
     _selectedCategoryId ??= provider.categories.first.id;
@@ -427,9 +445,26 @@ class _TransactionFormState extends State<TransactionForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Date: ${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
-                style: const TextStyle(fontSize: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Date: ${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  // If the user selected a different month, show the hint inline
+                  if (isDifferentMonth)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        '💡 Saving will switch view to month ${_selectedDate.month}/${_selectedDate.year}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               IconButton(
                 icon: const Icon(Icons.calendar_month),
@@ -477,6 +512,11 @@ class _TransactionFormState extends State<TransactionForm> {
                   _selectedCategoryId!,
                   _selectedDate,
                 );
+
+                // if they picked an out-of-bounds month, notify the HomeScreen
+                if (isDifferentMonth) {
+                  widget.onDateChanged(_selectedDate);
+                }
 
                 // return the user to the dashboard
                 Navigator.of(context).pop();
