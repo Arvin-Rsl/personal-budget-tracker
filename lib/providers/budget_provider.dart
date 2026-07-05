@@ -6,13 +6,17 @@ import 'package:personal_budget_app/models/budget_models.dart';
 
 class BudgetProvider extends ChangeNotifier {
   final List<Category> _categories = [
-    Category(id: '1', name: 'Food', allocatedBudget: 500.0),
-    Category(id: '2', name: 'Transportation', allocatedBudget: 100.0),
-    Category(id: '3', name: 'Sports', allocatedBudget: 80.0),
-    Category(id: '4', name: 'Clothes', allocatedBudget: 150.0),
-    Category(id: '5', name: 'Household Essentials', allocatedBudget: 80.0),
-    Category(id: '6', name: 'Having Fun', allocatedBudget: 150.0),
-    Category(id: '7', name: 'Savings', allocatedBudget: 1000.0),
+    Category(id: '1', name: 'Food, Groceries', allocatedBudget: 200.0),
+    Category(id: '2', name: 'Student Fees', allocatedBudget: 200.0),
+    Category(id: '3', name: 'Books, Educational Supplies', allocatedBudget: 200.0),
+    Category(id: '4', name: 'Sports, Gym', allocatedBudget: 200.0),
+    Category(id: '5', name: 'Clothing', allocatedBudget: 200.0),
+    Category(id: '6', name: 'Personal, Toiletries, Household Supplies', allocatedBudget: 200.0),
+    Category(id: '7', name: 'Transportation (Excluding U-Pass)', allocatedBudget: 200.0),
+    Category(id: '8', name: 'Tech Services (Internet, Phone, etc.)', allocatedBudget: 200.0),
+    Category(id: '9', name: 'Clubs, Recreation', allocatedBudget: 200.0),
+    Category(id: '10', name: 'Having Fun, Social Activities', allocatedBudget: 200.0),
+    Category(id: '11', name: 'Savings', allocatedBudget: 200.0),
   ];
 
   List<Transaction> _transactions = [];
