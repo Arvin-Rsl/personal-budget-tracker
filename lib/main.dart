@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/providers/budget_provider.dart';
 import 'budget_state.dart';
+import 'models/budget_models.dart';
 
 void main() {
   runApp(const MyApp());
@@ -110,7 +111,24 @@ class _TransactionFormState extends State<TransactionForm> {
           ),
           const SizedBox(height: 12),
 
-          // TODO: Implement Category Selection Dropdown
+          // Category dropdown menu
+          DropdownButtonFormField<String>(
+            initialValue: _selectedCategoryId,
+            decoration: const InputDecoration(labelText: 'Category'),
+            items: provider.categories.map((Category choice) {
+              return DropdownMenuItem<String>(
+                value: choice.id,
+                child: Text(choice.name),
+              );
+            }).toList(),
+            // Whenever the user clicks an alternative option label:
+            onChanged: (String? newlySelectedValue) {
+              setState(() {
+                _selectedCategoryId = newlySelectedValue;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
 
           // TODO: Implement Interactive Date Picker Row
 
