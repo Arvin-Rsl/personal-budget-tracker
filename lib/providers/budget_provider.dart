@@ -8,14 +8,34 @@ class BudgetProvider extends ChangeNotifier {
   final List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries', allocatedBudget: 200.0),
     Category(id: '2', name: 'Student Fees', allocatedBudget: 200.0),
-    Category(id: '3', name: 'Books, Educational Supplies', allocatedBudget: 200.0),
+    Category(
+      id: '3',
+      name: 'Books, Educational Supplies',
+      allocatedBudget: 200.0,
+    ),
     Category(id: '4', name: 'Sports, Gym', allocatedBudget: 200.0),
     Category(id: '5', name: 'Clothing', allocatedBudget: 200.0),
-    Category(id: '6', name: 'Personal, Toiletries, Household Supplies', allocatedBudget: 200.0),
-    Category(id: '7', name: 'Transportation (Excluding U-Pass)', allocatedBudget: 200.0),
-    Category(id: '8', name: 'Tech Services (Internet, Phone, etc.)', allocatedBudget: 200.0),
+    Category(
+      id: '6',
+      name: 'Personal, Toiletries, Household Supplies',
+      allocatedBudget: 200.0,
+    ),
+    Category(
+      id: '7',
+      name: 'Transportation (Excluding U-Pass)',
+      allocatedBudget: 200.0,
+    ),
+    Category(
+      id: '8',
+      name: 'Tech Services (Internet, Phone, etc.)',
+      allocatedBudget: 200.0,
+    ),
     Category(id: '9', name: 'Clubs, Recreation', allocatedBudget: 200.0),
-    Category(id: '10', name: 'Having Fun, Social Activities', allocatedBudget: 200.0),
+    Category(
+      id: '10',
+      name: 'Having Fun, Social Activities',
+      allocatedBudget: 200.0,
+    ),
     Category(id: '11', name: 'Savings', allocatedBudget: 200.0),
   ];
 
@@ -30,13 +50,9 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   double getAmountSpentForCategory(String categoryId) {
-    double total = 0;
-    for (Transaction t in transactions) {
-      if (t.categoryId == categoryId) {
-        total += t.amount;
-      }
-    }
-    return total;
+    return _transactions
+        .where((transaction) => transaction.categoryId == categoryId)
+        .fold(0.0, (sum, tx) => sum + tx.amount);
   }
 
   double getRemainingBudget(Category category) {
