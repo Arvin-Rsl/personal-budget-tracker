@@ -63,7 +63,39 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Build custom input fields and submit actions inside form sheet view
-    return const SizedBox.shrink();
+    final provider = BudgetState.of(context);
+
+    // default to the first available category ID if nothing is chosen yet
+    _selectedCategoryId ??= provider.categories.first.id;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        // ensures the form slides up perfectly above the keyboard
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        // constrains the sheet to only be as tall as its contents
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            'Add Cost',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16),
+
+          // TODO: Implement Description and Amount TextFields
+
+          // TODO: Implement Category Selection Dropdown
+
+          // TODO: Implement Interactive Date Picker Row
+
+          // TODO: Implement Action Submission Button
+        ],
+      ),
+    );
   }
 }
