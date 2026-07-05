@@ -86,13 +86,21 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   double getTotalSpentForMonth(int year, int month) {
-    // TODO: Filter _transactions array and accumulate totals for matching month/year
-    return 0.0;
+    double total = 0.0;
+    for (Transaction transaction in _transactions) {
+      if (year == transaction.date.year && month == transaction.date.month) {
+        total += transaction.amount;
+      }
+    }
+    return total;
   }
 
   double getOverallRemainingBudgetForMonth(int year, int month) {
-    // TODO: Subtract monthly expenditures from global category allocations
-    return 0.0;
+    double totalBudget = 0.0;
+    for (Category category in categories) {
+      totalBudget += category.allocatedBudget;
+    }
+    return totalBudget - getTotalSpentForMonth(year, month);
   }
 
   double getAmountSpentForCategoryAndMonth(
@@ -100,8 +108,15 @@ class BudgetProvider extends ChangeNotifier {
     int year,
     int month,
   ) {
-    // TODO: Filter transactions by matching category ID, year, and month
-    return 0.0;
+    double total = 0.0;
+    for (Transaction transaction in _transactions) {
+      if (categoryId == transaction.categoryId &&
+          year == transaction.date.year &&
+          month == transaction.date.month) {
+        total += transaction.amount;
+      }
+    }
+    return total;
   }
 
   // END OF CALCULATIONS
