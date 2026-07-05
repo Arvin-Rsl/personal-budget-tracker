@@ -130,7 +130,36 @@ class _TransactionFormState extends State<TransactionForm> {
           ),
           const SizedBox(height: 16),
 
-          // TODO: Implement Interactive Date Picker Row
+          // Date selection row displaying the choice and the calendar trigger button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Date: ${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
+                style: const TextStyle(fontSize: 16),
+              ),
+              IconButton(
+                icon: const Icon(Icons.calendar_month),
+                onPressed: () async {
+                  // Opens the OS-native full graphic calendar picker overlay modal
+                  final DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+
+                  // If the user picked a valid calendar date and didn't hit cancel
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedDate = pickedDate;
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
 
           // TODO: Implement Action Submission Button
         ],
