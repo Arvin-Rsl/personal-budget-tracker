@@ -48,8 +48,80 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TODO: Implement Top Financial Math Overview Card (Total Budget, Spent, Remaining)
-            const SizedBox(height: 24),
+            // financial summary
+            Card(
+              elevation: 4, // a subtle, sleek shadow below the card frame
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Remaining Balance',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Displays the dynamically calculated remaining balance
+                    Text(
+                      '\$${provider.getOverallRemainingBudget().toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.headlineLarge
+                          ?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: provider.getOverallRemainingBudget() > 0
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Divider line separating the main balance from the secondary totals row
+                    const Divider(),
+                    const SizedBox(height: 12),
+
+                    // Horizontal Row breaking down Total Budget allocation vs Total Spent costs
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            const Text(
+                              'Total Budget',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$${provider.getTotalBudget().toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'Total Spent',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$${provider.getTotalSpent().toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
             const Text(
               'Monthly Expenses by Category',
