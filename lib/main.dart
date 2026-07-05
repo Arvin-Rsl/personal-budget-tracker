@@ -80,14 +80,35 @@ class _TransactionFormState extends State<TransactionForm> {
         mainAxisSize: MainAxisSize.min,
         // constrains the sheet to only be as tall as its contents
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
+        children: [
+          const Text(
             'Add Cost',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-          // TODO: Implement Description and Amount TextFields
+          // Description
+          TextField(
+            controller: _descriptionController,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(
+              labelText: 'Description',
+              hintText: 'e.g., Lunch at Feast, Phone bill, Drake concert',
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Amount
+          TextField(
+            controller: _amountController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              labelText: 'Amount',
+              prefixText:
+                  '\$ ', // Automatically prefixes a dollar sign to the input line
+            ),
+          ),
+          const SizedBox(height: 12),
 
           // TODO: Implement Category Selection Dropdown
 
