@@ -55,8 +55,32 @@ class BudgetProvider extends ChangeNotifier {
         .fold(0.0, (sum, tx) => sum + tx.amount);
   }
 
-  double getRemainingBudget(Category category) {
+  double getRemainingBudgetForCategory(Category category) {
     return category.allocatedBudget - getAmountSpentForCategory(category.id);
+  }
+
+  double getTotalBudget() {
+    double totalBudget = 0;
+    for (Category category in categories) {
+      totalBudget += category.allocatedBudget;
+    }
+    return totalBudget;
+  }
+
+  double getTotalSpent() {
+    double totalSpent = 0;
+    for (Category category in categories) {
+      totalSpent += getAmountSpentForCategory(category.id);
+    }
+    return totalSpent;
+  }
+
+  double getOverallRemainingBudget() {
+    double totalRemainingBudget = 0;
+    for (Category category in categories) {
+      totalRemainingBudget += getRemainingBudgetForCategory(category);
+    }
+    return totalRemainingBudget;
   }
 
   void addTransaction(
