@@ -35,8 +35,43 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Extract budget state provider data and layout the scannable scaffold dashboard
-    return const Scaffold(body: Center(child: Text('Dashboard Stub')));
+    final provider = BudgetState.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Personal Budget Tracker'),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // TODO: Implement Top Financial Math Overview Card (Total Budget, Spent, Remaining)
+            const SizedBox(height: 24),
+
+            const Text(
+              'Monthly Expenses by Category',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+
+            // TODO: Implement Scrollable List of Categories with Progress Indicators
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => const TransactionForm(),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
   }
 }
 
