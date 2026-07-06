@@ -93,6 +93,23 @@ class BudgetProvider extends ChangeNotifier {
     return total;
   }
 
+  /// Returns a list of transactions filtered by category, year, and month, sorted by date
+  List<Transaction> getTransactionsForCategoryAndMonth(
+    String categoryId,
+    int year,
+    int month,
+  ) {
+    final filtered = _transactions.where((transaction) {
+      return transaction.categoryId == categoryId &&
+          transaction.date.year == year &&
+          transaction.date.month == month;
+    }).toList();
+
+    filtered.sort((a, b) => b.date.compareTo(a.date));
+
+    return filtered;
+  }
+
   // END OF CALCULATIONS
 
   void addTransaction(
