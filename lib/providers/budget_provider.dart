@@ -49,8 +49,6 @@ class BudgetProvider extends ChangeNotifier {
     _loadData();
   }
 
-  // BEGINNING OF CALCULATIONS
-
   double getTotalBudget() {
     double totalBudget = 0;
     for (Category category in categories) {
@@ -110,8 +108,6 @@ class BudgetProvider extends ChangeNotifier {
     return filtered;
   }
 
-  // END OF CALCULATIONS
-
   void addTransaction(
     String description,
     double amount,
@@ -130,6 +126,32 @@ class BudgetProvider extends ChangeNotifier {
     _transactions.add(newTransaction);
 
     _saveData();
+
+    notifyListeners();
+  }
+
+  /// Permanently removes a transaction from the state bucket and alerts the UI layer
+  void deleteTransaction(String transactionId) {
+    _transactions.removeWhere((transaction) => transaction.id == transactionId);
+    notifyListeners();
+  }
+
+  /// Updates the core properties of an existing transaction entry
+  void editTransaction(
+    String transactionId,
+    String newDescription,
+    double newAmount,
+    String newCategoryId,
+    DateTime newDate,
+  ) {
+    final targetTransaction = _transactions.firstWhere(
+      (transaction) => transaction.id == transactionId,
+    );
+
+    targetTransaction.description = newDescription;
+    targetTransaction.amount = newAmount;
+    targetTransaction.categoryId = newCategoryId;
+    targetTransaction.date = newDate;
 
     notifyListeners();
   }
