@@ -370,49 +370,98 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   );
                                 }
+
                                 return ListView.builder(
                                   shrinkWrap: true,
                                   // lets this nested list sit inside another Column safely
                                   physics: const NeverScrollableScrollPhysics(),
                                   // disables nested scrolling fights
                                   itemCount: transactions.length,
-                                  itemBuilder: (context, txIndex) {
-                                    final tx = transactions[txIndex];
+                                  itemBuilder: (context, transactionIndex) {
+                                    final transaction =
+                                        transactions[transactionIndex];
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 6.0,
+                                        vertical: 4.0,
                                       ),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                          // Flexible protects us from layout crashes if the description text is very long
+                                          Flexible(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  transaction.description,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${transaction.date.year}-${transaction.date.month.toString().padLeft(2, '0')}-${transaction.date.day.toString().padLeft(2, '0')}',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          // Group price tag and action buttons together on the right side
+                                          Row(
                                             children: [
                                               Text(
-                                                tx.description,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w500,
+                                                '-\$${transaction.amount.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.errorContainer,
                                                 ),
                                               ),
-                                              Text(
-                                                '${tx.date.year}-${tx.date.month.toString().padLeft(2, '0')}-${tx.date.day.toString().padLeft(2, '0')}',
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
+                                              const SizedBox(width: 4),
+
+                                              // Edit Button
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit,
+                                                  size: 18,
                                                 ),
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                                onPressed: () {
+                                                  // TODO: hook up edit modal form here
+                                                  debugPrint(
+                                                    'Clicked Edit on: ${transaction.description}',
+                                                  );
+                                                },
+                                              ),
+                                              const SizedBox(width: 8),
+
+                                              // Delete Button
+                                              IconButton(
+                                                icon: Icon(
+                                                  Icons.delete_outline,
+                                                  size: 18,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.error,
+                                                ),
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                                onPressed: () {
+                                                  provider.deleteTransaction(
+                                                    transaction.id,
+                                                  );
+                                                },
                                               ),
                                             ],
-                                          ),
-                                          Text(
-                                            '-\$${tx.amount.toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.errorContainer,
-                                            ),
                                           ),
                                         ],
                                       ),
