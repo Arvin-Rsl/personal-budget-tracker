@@ -11,11 +11,11 @@ class Category {
 }
 
 class Transaction {
-  final String id;
-  final String description;
-  final double amount;
-  final DateTime date;
-  final String categoryId;
+  String id;
+  String description;
+  double amount;
+  DateTime date;
+  String categoryId;
 
   Transaction({
     required this.id,
