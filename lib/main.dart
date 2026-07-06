@@ -435,9 +435,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 constraints:
                                                     const BoxConstraints(),
                                                 onPressed: () {
-                                                  // TODO: hook up edit modal form here
-                                                  debugPrint(
-                                                    'Clicked Edit on: ${transaction.description}',
+                                                  // open the same sheet, but pass the transaction data into it
+                                                  showModalBottomSheet(
+                                                    context: context,
+                                                    isScrollControlled: true,
+                                                    builder: (context) =>
+                                                        TransactionForm(
+                                                          currentViewedMonth:
+                                                              _selectedMonth,
+                                                          transactionToEdit:
+                                                              transaction,
+                                                          // pass this entry to pre-fill the form
+                                                          onDateChanged:
+                                                              (
+                                                                DateTime
+                                                                newMonthToView,
+                                                              ) {},
+                                                        ),
                                                   );
                                                 },
                                               ),
@@ -506,10 +520,14 @@ class TransactionForm extends StatefulWidget {
   final DateTime currentViewedMonth;
   final ValueChanged<DateTime> onDateChanged;
 
+  // the transaction we want to modify. If null, we're adding a new cost.
+  final Transaction? transactionToEdit;
+
   const TransactionForm({
     super.key,
     required this.currentViewedMonth,
     required this.onDateChanged,
+    this.transactionToEdit,
   });
 
   @override
@@ -521,7 +539,23 @@ class _TransactionFormState extends State<TransactionForm> {
   final _amountController = TextEditingController();
 
   String? _selectedCategoryId;
-  DateTime _selectedDate = DateTime.now(); // default = current moment
+  DateTime _selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    // If we passed a transaction to edit, pre-populate the form fields with its current data
+    if (widget.transactionToEdit != null) {
+      final tx = widget.transactionToEdit!;
+      _descriptionController.text = tx.description;
+      _amountController.text = tx.amount.toString();
+      _selectedCategoryId = tx.categoryId;
+      _selectedDate = tx.date;
+    } else {
+      // Default = current moment if adding a new transaction
+      _selectedDate = DateTime.now();
+    }
+  }
 
   @override
   void dispose() {
@@ -657,8 +691,11 @@ class _TransactionFormState extends State<TransactionForm> {
             // Stretches the button horizontally across the full card width
             child: FilledButton(
               onPressed: () {
-                final String inputDescription = _descriptionController.text.trim();
-                final double? inputAmount = double.tryParse(_amountController.text);
+                final String inputDescription = _descriptionController.text
+                    .trim();
+                final double? inputAmount = double.tryParse(
+                  _amountController.text,
+                );
 
                 if (inputAmount == null || inputAmount <= 0) {
                   debugPrint('Invalid Amount!');
@@ -668,17 +705,28 @@ class _TransactionFormState extends State<TransactionForm> {
                   return;
                 }
 
-                provider.addTransaction(
-                  inputDescription,
-                  inputAmount,
-                  _selectedCategoryId!,
-                  _selectedDate,
-                );
+                if (widget.transactionToEdit != null) {
+                  provider.editTransaction(
+                    widget.transactionToEdit!.id,
+                    inputDescription,
+                    inputAmount,
+                    _selectedCategoryId!,
+                    _selectedDate,
+                  );
+                } else {
+                  provider.addTransaction(
+                    inputDescription,
+                    inputAmount,
+                    _selectedCategoryId!,
+                    _selectedDate,
+                  );
+                }
 
                 // if they picked an out-of-bounds month, notify the HomeScreen
                 if (isDifferentMonth) {
                   widget.onDateChanged(_selectedDate);
                 }
+                // TODO: handle month switch in edit mode 
 
                 // return the user to the dashboard
                 Navigator.of(context).pop();
