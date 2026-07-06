@@ -41,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // Track which month and year the user is currently inspecting
   DateTime _selectedMonth = DateTime.now();
 
+  // Track which category is expanded. Null if all cards are closed.
+  String? _expandedCategoryId;
+
   static const MONTHS = [
     'January',
     'February',
@@ -272,21 +275,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? (spent / budget).clamp(0.0, 1.0)
                     : 0.0;
 
+                final bool isExpanded = category.id == _expandedCategoryId;
+
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 6.0),
                   // (clip behavior) ensuring the InkWell splash ripple doesn't bleed past the rounded card corners
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
                     onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) => CategoryTransactionsSheet(
-                          category: category,
-                          targetYear: targetYear,
-                          targetMonth: targetMonth,
-                        ),
-                      );
+                      setState(() {
+                        if (isExpanded) {
+                          _expandedCategoryId = null; // close if clicked again
+                        } else {
+                          _expandedCategoryId = category.id; // open this one
+                        }
+                      });
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -302,7 +305,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              // will swap this out for chevron arrow indicator dynamically later
                               Row(
                                 children: [
                                   Text(
@@ -313,8 +315,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  const Icon(
-                                    Icons.keyboard_arrow_down,
+                                  Icon(
+                                    isExpanded
+                                        ? Icons.keyboard_arrow_up
+                                        : Icons.keyboard_arrow_down,
                                     size: 18,
                                     color: Colors.grey,
                                   ),
@@ -323,6 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
+
                           LinearProgressIndicator(
                             value: percentSpent,
                             minHeight: 8,
@@ -334,6 +339,89 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? Theme.of(context).colorScheme.error
                                 : Theme.of(context).colorScheme.primary,
                           ),
+                          if (isExpanded) ...[
+                            const SizedBox(height: 16),
+                            const Divider(),
+                            const SizedBox(height: 8),
+
+                            Builder(
+                              builder: (context) {
+                                final transactions = provider
+                                    .getTransactionsForCategoryAndMonth(
+                                      category.id,
+                                      targetYear,
+                                      targetMonth,
+                                    );
+
+                                if (transactions.isEmpty) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8.0,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'No transactions recorded here yet.',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  // lets this nested list sit inside another Column safely
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  // disables nested scrolling fights
+                                  itemCount: transactions.length,
+                                  itemBuilder: (context, txIndex) {
+                                    final tx = transactions[txIndex];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 6.0,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                tx.description,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              Text(
+                                                '${tx.date.year}-${tx.date.month.toString().padLeft(2, '0')}-${tx.date.day.toString().padLeft(2, '0')}',
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Text(
+                                            '-\$${tx.amount.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.errorContainer,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -551,129 +639,6 @@ class _TransactionFormState extends State<TransactionForm> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class CategoryTransactionsSheet extends StatelessWidget {
-  final Category category;
-  final int targetYear;
-  final int targetMonth;
-
-  const CategoryTransactionsSheet({
-    super.key,
-    required this.category,
-    required this.targetYear,
-    required this.targetMonth,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = BudgetState.of(context);
-
-    final transactions = provider.getTransactionsForCategoryAndMonth(
-      category.id,
-      targetYear,
-      targetMonth,
-    );
-
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.5,
-      // Opens up half-screen initially
-      minChildSize: 0.25,
-      // Can be dragged down to close
-      maxChildSize: 0.85,
-      // Can be pulled up for a closer inspect look
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[600],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-
-              // Dynamic Title Header
-              Text(
-                '${category.name} Expenses',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Showing statements for month $targetMonth/$targetYear',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const Divider(height: 24),
-
-              // Handle empty transaction cases
-              if (transactions.isEmpty)
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'No expenses recorded here yet.',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                )
-              else
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    // sync scrollable bounds cleanly
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final transaction = transactions[index];
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 4.0,
-                        ),
-                        title: Text(
-                          transaction.description,
-                          style: const TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        subtitle: Text(
-                          '${transaction.date.year}-${transaction.date.month.toString().padLeft(2, '0')}-${transaction.date.day.toString().padLeft(2, '0')}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        trailing: Text(
-                          '-\$${transaction.amount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Theme.of(context).colorScheme.errorContainer,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
