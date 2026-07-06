@@ -83,12 +83,12 @@ class BudgetProvider extends ChangeNotifier {
     int month,
   ) {
     double total = 0.0;
-    for (Transaction transaction in _transactions) {
-      if (categoryId == transaction.categoryId &&
-          year == transaction.date.year &&
-          month == transaction.date.month) {
-        total += transaction.amount;
-      }
+    for (Transaction transaction in getTransactionsForCategoryAndMonth(
+      categoryId,
+      year,
+      month,
+    )) {
+      total += transaction.amount;
     }
     return total;
   }
