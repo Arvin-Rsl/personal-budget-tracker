@@ -274,43 +274,68 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 6.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              category.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '\$${spent.toStringAsFixed(0)} / \$${budget.toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
+                  // (clip behavior) ensuring the InkWell splash ripple doesn't bleed past the rounded card corners
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) => CategoryTransactionsSheet(
+                          category: category,
+                          targetYear: targetYear,
+                          targetMonth: targetMonth,
                         ),
-                        const SizedBox(height: 8),
-
-                        LinearProgressIndicator(
-                          value: percentSpent,
-                          minHeight: 8,
-                          borderRadius: BorderRadius.circular(4),
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                          color: percentSpent >= 1.0
-                              ? Theme.of(context).colorScheme.error
-                              : Theme.of(context).colorScheme.primary,
-                        ),
-                      ],
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                category.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              // will swap this out for chevron arrow indicator dynamically later
+                              Row(
+                                children: [
+                                  Text(
+                                    '\$${spent.toStringAsFixed(0)} / \$${budget.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    size: 18,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                            value: percentSpent,
+                            minHeight: 8,
+                            borderRadius: BorderRadius.circular(4),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                            color: percentSpent >= 1.0
+                                ? Theme.of(context).colorScheme.error
+                                : Theme.of(context).colorScheme.primary,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -526,6 +551,129 @@ class _TransactionFormState extends State<TransactionForm> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CategoryTransactionsSheet extends StatelessWidget {
+  final Category category;
+  final int targetYear;
+  final int targetMonth;
+
+  const CategoryTransactionsSheet({
+    super.key,
+    required this.category,
+    required this.targetYear,
+    required this.targetMonth,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = BudgetState.of(context);
+
+    final transactions = provider.getTransactionsForCategoryAndMonth(
+      category.id,
+      targetYear,
+      targetMonth,
+    );
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.5,
+      // Opens up half-screen initially
+      minChildSize: 0.25,
+      // Can be dragged down to close
+      maxChildSize: 0.85,
+      // Can be pulled up for a closer inspect look
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[600],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              // Dynamic Title Header
+              Text(
+                '${category.name} Expenses',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Showing statements for month $targetMonth/$targetYear',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const Divider(height: 24),
+
+              // Handle empty transaction cases
+              if (transactions.isEmpty)
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'No expenses recorded here yet.',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    // sync scrollable bounds cleanly
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 4.0,
+                        ),
+                        title: Text(
+                          transaction.description,
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        subtitle: Text(
+                          '${transaction.date.year}-${transaction.date.month.toString().padLeft(2, '0')}-${transaction.date.day.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        trailing: Text(
+                          '-\$${transaction.amount.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.errorContainer,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
