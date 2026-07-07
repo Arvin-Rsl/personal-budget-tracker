@@ -423,7 +423,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ).colorScheme.errorContainer,
                                                 ),
                                               ),
-                                              const SizedBox(width: 4),
+                                              const SizedBox(width: 20),
 
                                               // Edit Button
                                               IconButton(
@@ -459,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   );
                                                 },
                                               ),
-                                              const SizedBox(width: 8),
+                                              const SizedBox(width: 16),
 
                                               // Delete Button
                                               IconButton(
