@@ -598,8 +598,8 @@ class _TransactionFormState extends State<TransactionForm> {
         // constrains the sheet to only be as tall as its contents
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Add Cost',
+          Text(
+            widget.transactionToEdit != null ? 'Edit Cost' : 'Add Cost',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -739,7 +739,9 @@ class _TransactionFormState extends State<TransactionForm> {
                 // return the user to the dashboard
                 Navigator.of(context).pop();
               },
-              child: const Text('Add Cost'),
+              child: Text(
+                widget.transactionToEdit != null ? 'Save' : 'Add Cost',
+              ),
             ),
           ),
         ],
