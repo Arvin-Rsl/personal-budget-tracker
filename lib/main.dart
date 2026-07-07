@@ -39,7 +39,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // Track which month and year the user is currently inspecting
-  DateTime _selectedMonth = DateTime.now();
+  DateTime _inspectedMonth = DateTime.now();
 
   // Track which category is expanded. Null if all cards are closed.
   String? _expandedCategoryId;
@@ -68,8 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final provider = BudgetState.of(context);
 
-    final int targetYear = _selectedMonth.year;
-    final int targetMonth = _selectedMonth.month;
+    final int targetYear = _inspectedMonth.year;
+    final int targetMonth = _inspectedMonth.month;
 
     final double remaining = provider.getOverallRemainingBudgetForMonth(
       targetYear,
@@ -91,8 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.calendar_month, size: 28),
             tooltip: 'Change Month',
             onPressed: () async {
-              int selectedYear = _selectedMonth.year;
-              int selectedMonthNum = _selectedMonth.month;
+              int selectedYear = _inspectedMonth.year;
+              int selectedMonthNum = _inspectedMonth.month;
 
               // Generate a list of years dynamically (e.g., from 2020 to 2035)
               final List<int> yearsList = List.generate(
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           TextButton(
                             onPressed: () {
                               setState(() {
-                                _selectedMonth = DateTime(
+                                _inspectedMonth = DateTime(
                                   selectedYear,
                                   selectedMonthNum,
                                 );
@@ -439,19 +439,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   showModalBottomSheet(
                                                     context: context,
                                                     isScrollControlled: true,
-                                                    builder: (context) =>
-                                                        TransactionForm(
-                                                          currentViewedMonth:
-                                                              _selectedMonth,
-                                                          transactionToEdit:
-                                                              transaction,
-                                                          // pass this entry to pre-fill the form
-                                                          onDateChanged:
-                                                              (
-                                                                DateTime
-                                                                newMonthToView,
-                                                              ) {},
-                                                        ),
+                                                    builder: (context) => TransactionForm(
+                                                      currentViewedMonth:
+                                                          _inspectedMonth,
+                                                      transactionToEdit:
+                                                          transaction,
+                                                      // pass this entry to pre-fill the form
+                                                      onDateChanged:
+                                                          (
+                                                            DateTime
+                                                            newMonthToView,
+                                                          ) {
+                                                            setState(() {
+                                                              _inspectedMonth =
+                                                                  newMonthToView;
+                                                            });
+                                                          },
+                                                    ),
                                                   );
                                                 },
                                               ),
@@ -501,10 +505,10 @@ class _HomeScreenState extends State<HomeScreen> {
             context: context,
             isScrollControlled: true,
             builder: (context) => TransactionForm(
-              currentViewedMonth: _selectedMonth,
+              currentViewedMonth: _inspectedMonth,
               onDateChanged: (DateTime newMonthToView) {
                 setState(() {
-                  _selectedMonth = newMonthToView;
+                  _inspectedMonth = newMonthToView;
                 });
               },
             ),
@@ -552,8 +556,13 @@ class _TransactionFormState extends State<TransactionForm> {
       _selectedCategoryId = tx.categoryId;
       _selectedDate = tx.date;
     } else {
-      // Default = current moment if adding a new transaction
-      _selectedDate = DateTime.now();
+      if (DateTime.now().month == widget.currentViewedMonth.month) {
+        // Default = current moment if adding a new transaction belonging to this month.
+        _selectedDate = DateTime.now();
+      } else {
+        // Default = some day in the month we're currently viewing
+        _selectedDate = widget.currentViewedMonth;
+      }
     }
   }
 
@@ -726,7 +735,6 @@ class _TransactionFormState extends State<TransactionForm> {
                 if (isDifferentMonth) {
                   widget.onDateChanged(_selectedDate);
                 }
-                // TODO: handle month switch in edit mode 
 
                 // return the user to the dashboard
                 Navigator.of(context).pop();
