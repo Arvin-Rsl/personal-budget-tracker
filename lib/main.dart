@@ -548,6 +548,9 @@ class _TransactionFormState extends State<TransactionForm> {
   String? _selectedCategoryId;
   DateTime _selectedDate = DateTime.now();
 
+  String? _descriptionError;
+  String? _amountError;
+
   @override
   void initState() {
     super.initState();
@@ -567,6 +570,25 @@ class _TransactionFormState extends State<TransactionForm> {
         _selectedDate = widget.currentViewedMonth;
       }
     }
+
+    _descriptionController.addListener(() {
+      if (_descriptionError != null &&
+          _descriptionController.text.trim().isNotEmpty) {
+        setState(() {
+          _descriptionError = null;
+        });
+      }
+    });
+    _amountController.addListener(() {
+      if (_amountError != null) {
+        final double? amt = double.tryParse(_amountController.text);
+        if (amt != null && amt > 0) {
+          setState(() {
+            _amountError = null;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -611,9 +633,10 @@ class _TransactionFormState extends State<TransactionForm> {
           TextField(
             controller: _descriptionController,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Description',
               hintText: 'e.g., Lunch at Feast, Phone bill, Drake concert',
+              errorText: _descriptionError,
             ),
           ),
           const SizedBox(height: 12),
@@ -622,10 +645,11 @@ class _TransactionFormState extends State<TransactionForm> {
           TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Amount',
               prefixText:
                   '\$ ', // Automatically prefixes a dollar sign to the input line
+              errorText: _amountError,
             ),
           ),
           const SizedBox(height: 12),
@@ -710,11 +734,22 @@ class _TransactionFormState extends State<TransactionForm> {
                   _amountController.text,
                 );
 
-                if (inputAmount == null || inputAmount <= 0) {
-                  debugPrint('Invalid Amount!');
-                  return;
-                } else if (inputDescription.isEmpty) {
-                  debugPrint('Empty Description!');
+                String? tempDescError;
+                String? tempAmtError;
+
+                if (inputAmount == null) {
+                  tempAmtError = 'Invalid Amount!';
+                } else if (inputAmount <= 0) {
+                  tempAmtError = 'Enter a Positive Amount!';
+                }
+                if (inputDescription.isEmpty) {
+                  tempDescError = 'Description cannot be empty!';
+                }
+                if (tempDescError != null || tempAmtError != null) {
+                  setState(() {
+                    _descriptionError = tempDescError;
+                    _amountError = tempAmtError;
+                  });
                   return;
                 }
 
@@ -722,14 +757,14 @@ class _TransactionFormState extends State<TransactionForm> {
                   provider.editTransaction(
                     widget.transactionToEdit!.id,
                     inputDescription,
-                    inputAmount,
+                    inputAmount!,
                     _selectedCategoryId!,
                     _selectedDate,
                   );
                 } else {
                   provider.addTransaction(
                     inputDescription,
-                    inputAmount,
+                    inputAmount!,
                     _selectedCategoryId!,
                     _selectedDate,
                   );
