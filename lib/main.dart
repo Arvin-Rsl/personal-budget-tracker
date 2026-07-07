@@ -431,6 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   Icons.edit,
                                                   size: 18,
                                                 ),
+                                                tooltip: 'Edit',
                                                 padding: EdgeInsets.zero,
                                                 constraints:
                                                     const BoxConstraints(),
@@ -470,6 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     context,
                                                   ).colorScheme.error,
                                                 ),
+                                                tooltip: 'Delete',
                                                 padding: EdgeInsets.zero,
                                                 constraints:
                                                     const BoxConstraints(),
@@ -500,6 +502,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: 'Add Cost',
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -673,6 +676,7 @@ class _TransactionFormState extends State<TransactionForm> {
               ),
               IconButton(
                 icon: const Icon(Icons.calendar_month),
+                tooltip: 'Calendar',
                 onPressed: () async {
                   // Opens the OS-native full graphic calendar picker overlay modal
                   final DateTime? pickedDate = await showDatePicker(
