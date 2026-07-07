@@ -133,6 +133,9 @@ class BudgetProvider extends ChangeNotifier {
   /// Permanently removes a transaction from the state bucket and alerts the UI layer
   void deleteTransaction(String transactionId) {
     _transactions.removeWhere((transaction) => transaction.id == transactionId);
+
+    _saveData();
+
     notifyListeners();
   }
 
@@ -152,6 +155,8 @@ class BudgetProvider extends ChangeNotifier {
     targetTransaction.amount = newAmount;
     targetTransaction.categoryId = newCategoryId;
     targetTransaction.date = newDate;
+
+    _saveData();
 
     notifyListeners();
   }
