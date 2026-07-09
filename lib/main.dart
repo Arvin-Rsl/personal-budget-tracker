@@ -83,7 +83,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${_getMonthName(targetMonth)} $targetYear'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Left Arrow (Previous Month)
+            IconButton(
+              icon: const Icon(Icons.chevron_left, size: 24),
+              tooltip: 'Previous Month',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                setState(() {
+                  _inspectedMonth = DateTime(
+                    _inspectedMonth.year,
+                    _inspectedMonth.month - 1,
+                  );
+                });
+              },
+            ),
+            const SizedBox(width: 8),
+
+            Text('${_getMonthName(targetMonth)} $targetYear'),
+            const SizedBox(width: 8),
+
+            // Right Arrow (Next Month)
+            IconButton(
+              icon: const Icon(Icons.chevron_right, size: 24),
+              tooltip: 'Next Month',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                setState(() {
+                  _inspectedMonth = DateTime(
+                    _inspectedMonth.year,
+                    _inspectedMonth.month + 1,
+                  );
+                });
+              },
+            ),
+          ],
+        ),
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
