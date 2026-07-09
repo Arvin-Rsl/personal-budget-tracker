@@ -271,11 +271,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
                 final budget = category.allocatedBudget;
 
-                final double percentSpent = budget > 0
-                    ? (spent / budget).clamp(0.0, 1.0)
-                    : 0.0;
+                final double percentSpent = budget > 0 ? (spent / budget) : 0.0;
 
                 final bool isExpanded = category.id == _expandedCategoryId;
+
+                Color _getProgressColor(double percent) {
+                  if (percent >= 1.0) {
+                    return Colors.redAccent.shade700; // Ultra Warning
+                  } else if (percent >= 0.90) {
+                    return Colors.red.shade400; // Critical Alert
+                  } else if (percent >= 0.70) {
+                    return Colors.orangeAccent.shade400; // Caution Alert
+                  } else {
+                    return Theme.of(context).colorScheme.primary; // Safe Zone
+                  }
+                }
 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 6.0),
@@ -329,15 +339,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 8),
 
                           LinearProgressIndicator(
-                            value: percentSpent,
+                            value: percentSpent.clamp(0.0, 1.0),
                             minHeight: 8,
                             borderRadius: BorderRadius.circular(4),
                             backgroundColor: Theme.of(
                               context,
                             ).colorScheme.surfaceContainerHighest,
-                            color: percentSpent >= 1.0
-                                ? Theme.of(context).colorScheme.error
-                                : Theme.of(context).colorScheme.primary,
+                            color: _getProgressColor(percentSpent),
                           ),
                           if (isExpanded) ...[
                             const SizedBox(height: 16),
