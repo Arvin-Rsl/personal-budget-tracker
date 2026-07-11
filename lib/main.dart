@@ -3,28 +3,104 @@ import 'package:personal_budget_app/providers/budget_provider.dart';
 import 'budget_state.dart';
 import 'models/budget_models.dart';
 
+enum AppThemeColor {
+  teal('Teal', Colors.teal),
+  purple('Purple', Colors.purple),
+  orange('Orange', Colors.orange),
+  indigo('Indigo', Colors.indigo),
+  lime('Lime', Colors.lime),
+  green('Green', Colors.green);
+
+  final String label;
+  final Color seedColor;
+
+  const AppThemeColor(this.label, this.seedColor);
+}
+
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+// InheritedWidget to broadcast theme changes down the widget tree efficiently
+class InheritedThemeData extends InheritedWidget {
+  final _MyAppState state;
+
+  const InheritedThemeData({
+    super.key,
+    required this.state,
+    required super.child,
+  });
+
+  @override
+  bool updateShouldNotify(InheritedThemeData oldWidget) => true;
+}
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.dark; // Default = dark mode
+  AppThemeColor _activeColor = AppThemeColor.teal;
+
+  // Static helper so child elements can easily reach back and trigger updates
+  static _MyAppState of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<InheritedThemeData>()!
+        .state;
+  }
+
+  void changeThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
+  void changeColorTheme(AppThemeColor color) {
+    setState(() {
+      _activeColor = color;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BudgetState(
-      notifier: BudgetProvider(),
-      child: MaterialApp(
-        title: 'Personal Budget Tracker',
-        debugShowCheckedModeBanner: false, // hide the red development banner
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.teal,
-            brightness: Brightness.dark,
-          ),
+    return InheritedThemeData(
+      state: this,
+      child: BudgetState(
+        notifier: BudgetProvider(),
+        child: Builder(
+          builder: (context) {
+            return MaterialApp(
+              title: 'Personal Budget Tracker',
+              debugShowCheckedModeBanner: false,
+
+              // Light Theme settings using the active seed color
+              theme: ThemeData(
+                useMaterial3: true,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: _activeColor.seedColor,
+                  brightness: Brightness.light,
+                ),
+              ),
+
+              // Dark Theme settings using the active seed color
+              darkTheme: ThemeData(
+                useMaterial3: true,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: _activeColor.seedColor,
+                  brightness: Brightness.dark,
+                ),
+              ),
+
+              themeMode: _themeMode,
+              // Controlled dynamically by our state hook
+              home: const HomeScreen(),
+            );
+          },
         ),
-        home: const HomeScreen(),
       ),
     );
   }
