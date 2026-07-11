@@ -40,18 +40,21 @@ class MyApp extends StatefulWidget {
 
   @override
   State<MyApp> createState() => _MyAppState();
-}
 
-class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.dark; // Default = dark mode
-  AppThemeColor _activeColor = AppThemeColor.teal;
-
-  // Static helper so child elements can easily reach back and trigger updates
   static _MyAppState of(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<InheritedThemeData>()!
         .state;
   }
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.dark; // Default = dark mode
+  AppThemeColor _activeColor = AppThemeColor.teal; // Default = teal
+
+  ThemeMode get themeMode => _themeMode;
+
+  AppThemeColor get activeColor => _activeColor;
 
   void changeThemeMode(ThemeMode mode) {
     setState(() {
@@ -202,6 +205,110 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          // Theme & Personalization Control Button
+          IconButton(
+            icon: const Icon(Icons.palette_outlined, size: 26),
+            tooltip: 'App Theme Settings',
+            onPressed: () {
+              final themeState = MyApp.of(context);
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Appearance Settings'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Display Mode',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // quick toggle between modes
+                        SegmentedButton<ThemeMode>(
+                          segments: const [
+                            ButtonSegment(
+                              value: ThemeMode.light,
+                              icon: Icon(Icons.light_mode),
+                              label: Text('Light'),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.dark,
+                              icon: Icon(Icons.dark_mode),
+                              label: Text('Dark'),
+                            ),
+                          ],
+                          selected: {themeState.themeMode},
+                          onSelectionChanged: (Set<ThemeMode> selection) {
+                            themeState.changeThemeMode(selection.first);
+                          },
+                        ),
+                        const SizedBox(height: 20),
+
+                        Text(
+                          'Accent Color Palette',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Dropdown choice selector mapping out theme colors
+                        DropdownButtonFormField<AppThemeColor>(
+                          initialValue: themeState.activeColor,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                          ),
+                          items: AppThemeColor.values.map((
+                            AppThemeColor color,
+                          ) {
+                            return DropdownMenuItem<AppThemeColor>(
+                              value: color,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      color: color.seedColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(color.label),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (AppThemeColor? newColor) {
+                            if (newColor != null) {
+                              themeState.changeColorTheme(newColor);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.calendar_month, size: 28),
             tooltip: 'Change Month',
