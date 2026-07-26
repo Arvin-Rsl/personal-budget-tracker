@@ -50,18 +50,25 @@ class MyApp extends StatefulWidget {
 }
 
 // TODO: Add a `late final BudgetProvider` field to hold a single, stable instance of the provider
-  // for this widget's entire lifetime.
+// for this widget's entire lifetime.
 
 // TODO: Move `BudgetProvider()` construction into initState(), so it's created exactly
-  //  once when _MyAppState is first created, not on every rebuild
+//  once when _MyAppState is first created, not on every rebuild
 
 // TODO: Override dispose() to call _budgetProvider.dispose(), releasing its resources
-  //  (and its ChangeNotifier listeners) when _MyAppState is removed from the tree
+//  (and its ChangeNotifier listeners) when _MyAppState is removed from the tree
 
 // TODO: Update build() to reference the stored field instead of constructing a new BudgetProvider inline.
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.dark; // Default = dark mode
   AppThemeColor _activeColor = AppThemeColor.teal; // Default = teal
+  late final BudgetProvider _budgetProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _budgetProvider = BudgetProvider();
+  }
 
   ThemeMode get themeMode => _themeMode;
 
@@ -84,7 +91,7 @@ class _MyAppState extends State<MyApp> {
     return InheritedThemeData(
       state: this,
       child: BudgetState(
-        notifier: BudgetProvider(),
+        notifier: _budgetProvider,
         child: Builder(
           builder: (context) {
             return MaterialApp(
@@ -117,6 +124,12 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _budgetProvider.dispose();
+    super.dispose();
   }
 }
 
