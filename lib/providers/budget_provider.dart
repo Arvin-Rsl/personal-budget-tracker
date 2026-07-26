@@ -139,25 +139,30 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Updates the core properties of an existing transaction entry
+  /// Updates the properties of an existing transaction
   void editTransaction(
-    String transactionId,
-    String newDescription,
-    double newAmount,
-    String newCategoryId,
-    DateTime newDate,
-  ) {
-    final targetTransaction = _transactions.firstWhere(
-      (transaction) => transaction.id == transactionId,
+      String transactionId,
+      String newDescription,
+      double newAmount,
+      String newCategoryId,
+      DateTime newDate,
+      ) {
+    final targetIndex = _transactions.indexWhere(
+          (transaction) => transaction.id == transactionId,
     );
 
+    if (-1 == targetIndex) {
+      debugPrint("editTransaction: no transaction found with id $transactionId");
+      return;
+    }
+
+    final targetTransaction = _transactions[targetIndex];
     targetTransaction.description = newDescription;
     targetTransaction.amount = newAmount;
     targetTransaction.categoryId = newCategoryId;
     targetTransaction.date = newDate;
 
     _saveData();
-
     notifyListeners();
   }
 
