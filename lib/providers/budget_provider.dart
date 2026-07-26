@@ -216,7 +216,15 @@ class BudgetProvider extends ChangeNotifier {
   }
 }
 
-// Locates a secure local system file address for persistent storage
+// TODO: Change _getLocalStorageFile() to be async, returning Future<File> instead of File.
+  // Use getApplicationDocumentsDirectory() from path_provider instead of Directory.systemTemp,
+  // since temp storage isn't guaranteed to persist across app runs.
+
+// TODO: Update _saveData() to be async, and await the now-async _getLocalStorageFile() call before writing.
+
+// TODO: Update _loadData() to be async, and await the now-async _getLocalStorageFile() call before reading.
+// TODO: Confirm the constructor still works correctly calling _loadData() without awaiting it directly (constructors can't
+  //  be async) — the load will complete slightly after construction, notifyListeners() will update the UI once data arrives.
 File _getLocalStorageFile() {
   // Accesses a safe, sandbox environment directory provided by the operating system
   final systemDirectory = Directory.systemTemp.path;
