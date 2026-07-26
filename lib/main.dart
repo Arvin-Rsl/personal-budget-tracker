@@ -42,6 +42,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 
   static _MyAppState of(BuildContext context) {
+    // TODO: assert, and null check
     return context
         .dependOnInheritedWidgetOfExactType<InheritedThemeData>()!
         .state;
@@ -208,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Theme & Personalization Control Button
           IconButton(
             icon: const Icon(Icons.palette_outlined, size: 26),
-            tooltip: 'App Theme Settings',
+            tooltip: 'Theme',
             onPressed: () {
               final themeState = MyApp.of(context);
 
@@ -216,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Appearance Settings'),
+                    title: const Text('Theme Settings'),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -648,9 +649,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 '-\$${transaction.amount.toStringAsFixed(2)}',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.errorContainer,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .errorContainer, // TODO (fix): not readable in light mode.
                                                 ),
                                               ),
                                               const SizedBox(width: 20),
@@ -792,8 +793,9 @@ class _TransactionFormState extends State<TransactionForm> {
       _selectedCategoryId = tx.categoryId;
       _selectedDate = tx.date;
     } else {
-      if (DateTime.now().month == widget.currentViewedMonth.month) {
-        // Default = current moment if adding a new transaction belonging to this month.
+      if (DateTime.now().month == widget.currentViewedMonth.month &&
+          DateTime.now().year == widget.currentViewedMonth.year) {
+        // Default = current moment if adding a new transaction belonging to this month&year
         _selectedDate = DateTime.now();
       } else {
         // Default = some day in the month we're currently viewing
@@ -838,7 +840,7 @@ class _TransactionFormState extends State<TransactionForm> {
         _selectedDate.month != widget.currentViewedMonth.month;
 
     // default to the first available category ID if nothing is chosen yet
-    _selectedCategoryId ??= provider.categories.first.id;
+    _selectedCategoryId ??= provider.categories.first.id; // TODO: maybe move to initState?
 
     return Padding(
       padding: EdgeInsets.only(
