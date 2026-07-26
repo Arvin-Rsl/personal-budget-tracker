@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
@@ -161,9 +161,9 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _saveData() {
+  Future<void> _saveData() async {
     try {
-      final file = _getLocalStorageFile();
+      final file = await _getLocalStorageFile();
       // Convert our list of Transaction objects into a List of Maps (JSON format)
       final List<Map<String, dynamic>> structuredData = _transactions
           .map(
@@ -178,19 +178,19 @@ class BudgetProvider extends ChangeNotifier {
           .toList();
 
       // Encode the structured map data into a long single string text and write it
-      file.writeAsStringSync(jsonEncode(structuredData));
+      await file.writeAsString(jsonEncode(structuredData));
     } catch (error) {
       debugPrint("Failed to write budget data to disk: $error");
     }
   }
 
-  void _loadData() {
+  Future<void> _loadData() async {
     try {
-      final file = _getLocalStorageFile();
+      final file = await _getLocalStorageFile();
 
       // Safety check: if the file doesn't exist yet (first-time launch), stop here
-      if (file.existsSync()) {
-        final String rawText = file.readAsStringSync();
+      if (await file.exists()) {
+        final String rawText = await file.readAsString();
 
         // Convert the raw string text back into a dynamic Dart List of Maps
         final List<dynamic> decodedData = jsonDecode(rawText);
@@ -216,17 +216,7 @@ class BudgetProvider extends ChangeNotifier {
   }
 }
 
-// TODO: Change _getLocalStorageFile() to be async, returning Future<File> instead of File.
-  // Use getApplicationDocumentsDirectory() from path_provider instead of Directory.systemTemp,
-  // since temp storage isn't guaranteed to persist across app runs.
-
-// TODO: Update _saveData() to be async, and await the now-async _getLocalStorageFile() call before writing.
-
-// TODO: Update _loadData() to be async, and await the now-async _getLocalStorageFile() call before reading.
-// TODO: Confirm the constructor still works correctly calling _loadData() without awaiting it directly (constructors can't
-  //  be async) — the load will complete slightly after construction, notifyListeners() will update the UI once data arrives.
-File _getLocalStorageFile() {
-  // Accesses a safe, sandbox environment directory provided by the operating system
-  final systemDirectory = Directory.systemTemp.path;
-  return File('$systemDirectory/my_smart_budget_data.json');
+Future<File> _getLocalStorageFile() async {
+  final directory = await getApplicationDocumentsDirectory();
+  return File('${directory.path}/transactions_data.json');
 }
