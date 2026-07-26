@@ -49,6 +49,16 @@ class MyApp extends StatefulWidget {
   }
 }
 
+// TODO: Add a `late final BudgetProvider` field to hold a single, stable instance of the provider
+  // for this widget's entire lifetime.
+
+// TODO: Move `BudgetProvider()` construction into initState(), so it's created exactly
+  //  once when _MyAppState is first created, not on every rebuild
+
+// TODO: Override dispose() to call _budgetProvider.dispose(), releasing its resources
+  //  (and its ChangeNotifier listeners) when _MyAppState is removed from the tree
+
+// TODO: Update build() to reference the stored field instead of constructing a new BudgetProvider inline.
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.dark; // Default = dark mode
   AppThemeColor _activeColor = AppThemeColor.teal; // Default = teal
@@ -840,7 +850,8 @@ class _TransactionFormState extends State<TransactionForm> {
         _selectedDate.month != widget.currentViewedMonth.month;
 
     // default to the first available category ID if nothing is chosen yet
-    _selectedCategoryId ??= provider.categories.first.id; // TODO: maybe move to initState?
+    _selectedCategoryId ??=
+        provider.categories.first.id; // TODO: maybe move to initState?
 
     return Padding(
       padding: EdgeInsets.only(
