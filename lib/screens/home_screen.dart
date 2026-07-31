@@ -243,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      // TODO: Replace single "Add Cost" FAB with a choice: Add Expense / Add Income
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add Cost',
         onPressed: () {
