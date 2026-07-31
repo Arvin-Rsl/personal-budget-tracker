@@ -111,6 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // TODO: Add a second summary card showing Unallocated Funds and Savings balances
             Card(
               elevation: 4,
               child: Padding(
