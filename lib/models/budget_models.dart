@@ -1,9 +1,3 @@
-// TODO: Add Income model - tracks money coming in, immutable ledger entry
-
-// TODO: Add FundPool enum + Transfer model (tracks money movement between
-// Unallocated Funds, Savings, and category/month budgets).
-// corrections happen via new offsetting transfers, no edits.
-
 class Category {
   final String id;
   final String name;
@@ -29,5 +23,45 @@ class Transaction {
     required this.amount,
     required this.date,
     required this.categoryId,
+  });
+}
+
+class Income {
+  final String id;
+  final String description;
+  final double amount;
+  final DateTime date;
+
+  const Income({
+    required this.id,
+    required this.description,
+    required this.amount,
+    required this.date,
+  });
+}
+
+enum FundPool { unallocatedFunds, savings, categoryBudget }
+
+class Transfer {
+  final String id;
+  final double amount;
+  final DateTime date;
+  final FundPool from;
+  final FundPool to;
+
+  // Only when from/to is categoryBudget:
+  final String? categoryId;
+  final int? year;
+  final int? month;
+
+  const Transfer({
+    required this.id,
+    required this.amount,
+    required this.date,
+    required this.from,
+    required this.to,
+    this.categoryId,
+    this.year,
+    this.month,
   });
 }
