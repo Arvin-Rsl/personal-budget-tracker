@@ -39,6 +39,14 @@ class BudgetProvider extends ChangeNotifier {
     Category(id: '11', name: 'Savings', allocatedBudget: 200.0),
   ];
 
+// TODO: Add private _incomes and _transfers lists, plus public getters
+
+// TODO: Persist incomes and transfers (save/load), same pattern as transactions
+
+// TODO: Add addIncome() and addTransfer() methods, following the pattern used for transactions
+
+// TODO: Add derived-balance getters: getUnallocatedFundsBalance(), getSavingsBalance(), getAllocatedBudgetForCategoryAndMonth()
+
   List<Transaction> _transactions = [];
 
   List<Category> get categories => _categories;
