@@ -113,6 +113,8 @@ class BudgetProvider extends ChangeNotifier {
     return allocated;
   }
 
+  // TODO: getTotalBudget needs year/month params now; sum derived per-category budgets instead of the removed Category.allocatedBudget
+
   double getTotalBudget() {
     double totalBudget = 0;
     for (Category category in categories) {

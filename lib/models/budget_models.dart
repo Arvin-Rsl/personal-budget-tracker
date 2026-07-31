@@ -1,3 +1,4 @@
+// TODO: Remove allocatedBudget from Category; budget now comes from getAllocatedBudgetForCategoryAndMonth() (derived from Transfers)
 class Category {
   final String id;
   final String name;
