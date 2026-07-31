@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:personal_budget_app/screens/savings_screen.dart';
+import 'package:personal_budget_app/screens/unallocated_funds_screen.dart';
 import '../budget_state.dart';
 import '../app.dart';
 import '../widgets/category_card.dart';
@@ -54,8 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
       targetMonth,
     );
     final double totalBudget = provider.getTotalBudget(targetYear, targetMonth);
-    final double unallocatedFunds = provider.getUnallocatedFundsBalance();
-    final double savingsBalance = provider.getSavingsBalance();
 
     return Scaffold(
       appBar: AppBar(
@@ -110,6 +110,67 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const Padding(padding: EdgeInsets.only(right: 8.0)),
         ],
+      ),
+      endDrawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Home'),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.account_balance_wallet_outlined),
+                title: const Text('Unallocated Funds'),
+                trailing: Text(
+                  '\$${provider.getUnallocatedFundsBalance().toStringAsFixed(2)}',
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const UnallocatedFundsScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.savings_outlined),
+                title: const Text('Savings'),
+                trailing: Text(
+                  '\$${provider.getSavingsBalance().toStringAsFixed(2)}',
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const SavingsScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.category_outlined),
+                title: const Text('Categories'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  // TODO: push CategoriesScreen once built
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text('Settings'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  // TODO: push SettingsScreen once built
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -183,56 +244,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          'Unallocated Funds',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${unallocatedFunds.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          'Savings',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${savingsBalance.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 24),
             const Text(
               'Monthly Expenses by Category',
@@ -299,7 +310,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      // TODO: Replace single "Add Cost" FAB with a choice: Add Expense / Add Income
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add',
         onPressed: () => _showAddOptions(context),
