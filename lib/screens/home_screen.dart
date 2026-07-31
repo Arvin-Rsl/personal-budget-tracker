@@ -5,6 +5,9 @@ import '../widgets/category_card.dart';
 import '../widgets/income_form.dart';
 import '../widgets/transaction_form.dart';
 
+// TODO: Add endDrawer with Home/Unallocated Funds/Savings/Categories/Settings
+// TODO: Remove the Unallocated Funds/Savings summary Card - moving to drawer/dedicated screens instead
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
