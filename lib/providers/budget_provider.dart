@@ -38,23 +38,79 @@ class BudgetProvider extends ChangeNotifier {
     ),
     Category(id: '11', name: 'Savings', allocatedBudget: 200.0),
   ];
-
-// TODO: Add private _incomes and _transfers lists, plus public getters
-
-// TODO: Persist incomes and transfers (save/load), same pattern as transactions
-
-// TODO: Add addIncome() and addTransfer() methods, following the pattern used for transactions
-
-// TODO: Add derived-balance getters: getUnallocatedFundsBalance(), getSavingsBalance(), getAllocatedBudgetForCategoryAndMonth()
-
   List<Transaction> _transactions = [];
+  List<Income> _incomes = [];
+  List<Transfer> _transfers = [];
 
   List<Category> get categories => _categories;
 
   List<Transaction> get transactions => _transactions;
 
+  List<Income> get incomes => _incomes;
+
+  List<Transfer> get transfers => _transfers;
+
   BudgetProvider() {
     _loadData();
+  }
+
+  double getUnallocatedFundsBalance() {
+    double balance = 0.0;
+
+    for (Income income in _incomes) {
+      balance += income.amount;
+    }
+
+    for (Transfer transfer in _transfers) {
+      if (transfer.to == FundPool.unallocatedFunds) {
+        balance += transfer.amount;
+      }
+      if (transfer.from == FundPool.unallocatedFunds) {
+        balance -= transfer.amount;
+      }
+    }
+
+    return balance;
+  }
+
+  double getSavingsBalance() {
+    double balance = 0.0;
+
+    for (Transfer transfer in _transfers) {
+      if (transfer.to == FundPool.savings) {
+        balance += transfer.amount;
+      }
+      if (transfer.from == FundPool.savings) {
+        balance -= transfer.amount;
+      }
+    }
+
+    return balance;
+  }
+
+  double getAllocatedBudgetForCategoryAndMonth(
+    String categoryId,
+    int year,
+    int month,
+  ) {
+    double allocated = 0.0;
+
+    for (Transfer transfer in _transfers) {
+      if (transfer.to == FundPool.categoryBudget &&
+          transfer.categoryId == categoryId &&
+          transfer.year == year &&
+          transfer.month == month) {
+        allocated += transfer.amount;
+      }
+      if (transfer.from == FundPool.categoryBudget &&
+          transfer.categoryId == categoryId &&
+          transfer.year == year &&
+          transfer.month == month) {
+        allocated -= transfer.amount;
+      }
+    }
+
+    return allocated;
   }
 
   double getTotalBudget() {
@@ -149,18 +205,20 @@ class BudgetProvider extends ChangeNotifier {
 
   /// Updates the properties of an existing transaction
   void editTransaction(
-      String transactionId,
-      String newDescription,
-      double newAmount,
-      String newCategoryId,
-      DateTime newDate,
-      ) {
+    String transactionId,
+    String newDescription,
+    double newAmount,
+    String newCategoryId,
+    DateTime newDate,
+  ) {
     final targetIndex = _transactions.indexWhere(
-          (transaction) => transaction.id == transactionId,
+      (transaction) => transaction.id == transactionId,
     );
 
     if (-1 == targetIndex) {
-      debugPrint("editTransaction: no transaction found with id $transactionId");
+      debugPrint(
+        "editTransaction: no transaction found with id $transactionId",
+      );
       return;
     }
 
@@ -174,11 +232,49 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addIncome(String description, double amount, DateTime date) {
+    final newIncome = Income(
+      id: DateTime.now().toString(),
+      description: description,
+      amount: amount,
+      date: date,
+    );
+
+    _incomes.add(newIncome);
+    _saveData();
+    notifyListeners();
+  }
+
+  void addTransfer(
+    double amount,
+    DateTime date,
+    FundPool from,
+    FundPool to, {
+    String? categoryId,
+    int? year,
+    int? month,
+  }) {
+    final newTransfer = Transfer(
+      id: DateTime.now().toString(),
+      amount: amount,
+      date: date,
+      from: from,
+      to: to,
+      categoryId: categoryId,
+      year: year,
+      month: month,
+    );
+
+    _transfers.add(newTransfer);
+    _saveData();
+    notifyListeners();
+  }
+
   Future<void> _saveData() async {
     try {
       final file = await _getLocalStorageFile();
-      // Convert our list of Transaction objects into a List of Maps (JSON format)
-      final List<Map<String, dynamic>> structuredData = _transactions
+
+      final List<Map<String, dynamic>> transactionsData = _transactions
           .map(
             (transaction) => {
               'id': transaction.id,
@@ -190,7 +286,38 @@ class BudgetProvider extends ChangeNotifier {
           )
           .toList();
 
-      // Encode the structured map data into a long single string text and write it
+      final List<Map<String, dynamic>> incomesData = _incomes
+          .map(
+            (income) => {
+              'id': income.id,
+              'description': income.description,
+              'amount': income.amount,
+              'date': income.date.toIso8601String(),
+            },
+          )
+          .toList();
+
+      final List<Map<String, dynamic>> transfersData = _transfers
+          .map(
+            (transfer) => {
+              'id': transfer.id,
+              'amount': transfer.amount,
+              'date': transfer.date.toIso8601String(),
+              'from': transfer.from.name,
+              'to': transfer.to.name,
+              'categoryId': transfer.categoryId,
+              'year': transfer.year,
+              'month': transfer.month,
+            },
+          )
+          .toList();
+
+      final Map<String, dynamic> structuredData = {
+        'transactions': transactionsData,
+        'incomes': incomesData,
+        'transfers': transfersData,
+      };
+
       await file.writeAsString(jsonEncode(structuredData));
     } catch (error) {
       debugPrint("Failed to write budget data to disk: $error");
@@ -201,15 +328,13 @@ class BudgetProvider extends ChangeNotifier {
     try {
       final file = await _getLocalStorageFile();
 
-      // Safety check: if the file doesn't exist yet (first-time launch), stop here
       if (await file.exists()) {
         final String rawText = await file.readAsString();
+        final Map<String, dynamic> decodedData = jsonDecode(rawText);
 
-        // Convert the raw string text back into a dynamic Dart List of Maps
-        final List<dynamic> decodedData = jsonDecode(rawText);
-
-        // Reconstruct our structured Transaction objects from the map values
-        _transactions = decodedData
+        final List<dynamic> transactionsData =
+            decodedData['transactions'] ?? [];
+        _transactions = transactionsData
             .map(
               (item) => Transaction(
                 id: item['id'],
@@ -217,6 +342,34 @@ class BudgetProvider extends ChangeNotifier {
                 amount: (item['amount'] as num).toDouble(),
                 date: DateTime.parse(item['date']),
                 categoryId: item['categoryId'],
+              ),
+            )
+            .toList();
+
+        final List<dynamic> incomesData = decodedData['incomes'] ?? [];
+        _incomes = incomesData
+            .map(
+              (item) => Income(
+                id: item['id'],
+                description: item['description'],
+                amount: (item['amount'] as num).toDouble(),
+                date: DateTime.parse(item['date']),
+              ),
+            )
+            .toList();
+
+        final List<dynamic> transfersData = decodedData['transfers'] ?? [];
+        _transfers = transfersData
+            .map(
+              (item) => Transfer(
+                id: item['id'],
+                amount: (item['amount'] as num).toDouble(),
+                date: DateTime.parse(item['date']),
+                from: FundPool.values.byName(item['from']),
+                to: FundPool.values.byName(item['to']),
+                categoryId: item['categoryId'],
+                year: item['year'],
+                month: item['month'],
               ),
             )
             .toList();
