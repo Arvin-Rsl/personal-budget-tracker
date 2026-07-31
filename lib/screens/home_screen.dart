@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../budget_state.dart';
 import '../app.dart';
 import '../widgets/category_card.dart';
+import '../widgets/income_form.dart';
 import '../widgets/transaction_form.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -245,21 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       // TODO: Replace single "Add Cost" FAB with a choice: Add Expense / Add Income
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add Cost',
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => TransactionForm(
-              currentViewedMonth: _inspectedMonth,
-              onDateChanged: (newMonth) {
-                setState(() {
-                  _inspectedMonth = newMonth;
-                });
-              },
-            ),
-          );
-        },
+        tooltip: 'Add',
+        onPressed: () => _showAddOptions(context),
         child: const Icon(Icons.add),
       ),
     );
@@ -418,6 +406,52 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showAddOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.remove_circle_outline),
+                title: const Text('Add Expense'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) => TransactionForm(
+                      currentViewedMonth: _inspectedMonth,
+                      onDateChanged: (newMonth) {
+                        setState(() {
+                          _inspectedMonth = newMonth;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.add_circle_outline),
+                title: const Text('Add Income'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) => const IncomeForm(),
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );
