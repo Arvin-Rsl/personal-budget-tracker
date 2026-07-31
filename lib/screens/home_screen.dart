@@ -51,6 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
       targetMonth,
     );
     final double totalBudget = provider.getTotalBudget(targetYear, targetMonth);
+    final double unallocatedFunds = provider.getUnallocatedFundsBalance();
+    final double savingsBalance = provider.getSavingsBalance();
 
     return Scaffold(
       appBar: AppBar(
@@ -111,7 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TODO: Add a second summary card showing Unallocated Funds and Savings balances
             Card(
               elevation: 4,
               child: Padding(
@@ -172,6 +173,56 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          'Unallocated Funds',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '\$${unallocatedFunds.toStringAsFixed(2)}',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          'Savings',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '\$${savingsBalance.toStringAsFixed(2)}',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
