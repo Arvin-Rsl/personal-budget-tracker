@@ -2,13 +2,8 @@
 class Category {
   final String id;
   final String name;
-  final double allocatedBudget;
 
-  Category({
-    required this.id,
-    required this.name,
-    required this.allocatedBudget,
-  });
+  Category({required this.id, required this.name});
 }
 
 class Transaction {

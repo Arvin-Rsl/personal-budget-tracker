@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
       targetYear,
       targetMonth,
     );
-    final double totalBudget = provider.getTotalBudget();
+    final double totalBudget = provider.getTotalBudget(targetYear, targetMonth);
 
     return Scaffold(
       appBar: AppBar(
@@ -201,9 +201,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       targetMonth,
                     );
                 final bool isExpanded = category.id == _expandedCategoryId;
+                final allocatedBudget = provider
+                    .getAllocatedBudgetForCategoryAndMonth(
+                      category.id,
+                      targetYear,
+                      targetMonth,
+                    );
 
                 return CategoryCard(
                   category: category,
+                  allocatedBudget: allocatedBudget,
                   spentAmount: spent,
                   transactions: transactions,
                   isExpanded: isExpanded,

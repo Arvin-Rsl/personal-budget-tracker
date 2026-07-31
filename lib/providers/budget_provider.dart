@@ -6,37 +6,16 @@ import 'package:personal_budget_app/models/budget_models.dart';
 
 class BudgetProvider extends ChangeNotifier {
   final List<Category> _categories = [
-    Category(id: '1', name: 'Food, Groceries', allocatedBudget: 200.0),
-    Category(id: '2', name: 'Student Fees', allocatedBudget: 200.0),
-    Category(
-      id: '3',
-      name: 'Books, Educational Supplies',
-      allocatedBudget: 200.0,
-    ),
-    Category(id: '4', name: 'Sports, Gym', allocatedBudget: 200.0),
-    Category(id: '5', name: 'Clothing', allocatedBudget: 200.0),
-    Category(
-      id: '6',
-      name: 'Personal, Toiletries, Household Supplies',
-      allocatedBudget: 200.0,
-    ),
-    Category(
-      id: '7',
-      name: 'Transportation (Excluding U-Pass)',
-      allocatedBudget: 200.0,
-    ),
-    Category(
-      id: '8',
-      name: 'Tech Services (Internet, Phone, etc.)',
-      allocatedBudget: 200.0,
-    ),
-    Category(id: '9', name: 'Clubs, Recreation', allocatedBudget: 200.0),
-    Category(
-      id: '10',
-      name: 'Having Fun, Social Activities',
-      allocatedBudget: 200.0,
-    ),
-    Category(id: '11', name: 'Savings', allocatedBudget: 200.0),
+    Category(id: '1', name: 'Food, Groceries'),
+    Category(id: '2', name: 'Student Fees'),
+    Category(id: '3', name: 'Books, Educational Supplies'),
+    Category(id: '4', name: 'Sports, Gym'),
+    Category(id: '5', name: 'Clothing'),
+    Category(id: '6', name: 'Personal, Toiletries, Household Supplies'),
+    Category(id: '7', name: 'Transportation (Excluding U-Pass)'),
+    Category(id: '8', name: 'Tech Services (Internet, Phone, etc.)'),
+    Category(id: '9', name: 'Clubs, Recreation'),
+    Category(id: '10', name: 'Having Fun, Social Activities'),
   ];
   List<Transaction> _transactions = [];
   List<Income> _incomes = [];
@@ -113,12 +92,14 @@ class BudgetProvider extends ChangeNotifier {
     return allocated;
   }
 
-  // TODO: getTotalBudget needs year/month params now; sum derived per-category budgets instead of the removed Category.allocatedBudget
-
-  double getTotalBudget() {
+  double getTotalBudget(int year, int month) {
     double totalBudget = 0;
     for (Category category in categories) {
-      totalBudget += category.allocatedBudget;
+      totalBudget += getAllocatedBudgetForCategoryAndMonth(
+        category.id,
+        year,
+        month,
+      );
     }
     return totalBudget;
   }
@@ -134,11 +115,7 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   double getOverallRemainingBudgetForMonth(int year, int month) {
-    double totalBudget = 0.0;
-    for (Category category in categories) {
-      totalBudget += category.allocatedBudget;
-    }
-    return totalBudget - getTotalSpentForMonth(year, month);
+    return getTotalBudget(year, month) - getTotalSpentForMonth(year, month);
   }
 
   double getAmountSpentForCategoryAndMonth(

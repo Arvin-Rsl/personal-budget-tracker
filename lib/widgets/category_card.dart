@@ -4,6 +4,7 @@ import 'transaction_tile.dart';
 
 class CategoryCard extends StatelessWidget {
   final Category category;
+  final double allocatedBudget;
   final double spentAmount;
   final List<Transaction> transactions;
   final bool isExpanded;
@@ -14,6 +15,7 @@ class CategoryCard extends StatelessWidget {
   const CategoryCard({
     super.key,
     required this.category,
+    required this.allocatedBudget,
     required this.spentAmount,
     required this.transactions,
     required this.isExpanded,
@@ -36,7 +38,7 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double budget = category.allocatedBudget;
+    final double budget = allocatedBudget;
     final double percentSpent = budget > 0 ? (spentAmount / budget) : 0.0;
 
     return Card(
