@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../budget_state.dart';
+import '../models/budget_models.dart';
+import '../widgets/transfer_form.dart';
 
 class UnallocatedFundsScreen extends StatelessWidget {
   const UnallocatedFundsScreen({super.key});
@@ -22,7 +24,24 @@ class UnallocatedFundsScreen extends StatelessWidget {
                 context,
               ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            // TODO: Add Transfer button + transfer history list
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('Transfer'),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => TransferForm(
+                    sourcePool: FundPool.unallocatedFunds,
+                    allowedDestinations: const [
+                      FundPool.savings,
+                      FundPool.categoryBudget,
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
