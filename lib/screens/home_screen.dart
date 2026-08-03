@@ -98,17 +98,25 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          // TODO: the Theme selection should be placed in settings from now on
           IconButton(
             icon: const Icon(Icons.palette_outlined, size: 26),
             tooltip: 'Theme',
             onPressed: () => _showThemeSettingsDialog(context),
           ),
+          // TODO: Instead of icon, clicking on the current month in the appbar should call the _showMonthPickerDialog
           IconButton(
             icon: const Icon(Icons.calendar_month, size: 28),
             tooltip: 'Change Month',
             onPressed: () => _showMonthPickerDialog(context),
           ),
-          const Padding(padding: EdgeInsets.only(right: 8.0)),
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              tooltip: 'Menu',
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+            ),
+          ),
         ],
       ),
       endDrawer: Drawer(
