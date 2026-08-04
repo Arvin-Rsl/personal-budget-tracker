@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../budget_state.dart';
 import '../models/budget_models.dart';
+import '../providers/budget_provider.dart';
 
 class TransferForm extends StatefulWidget {
   final FundPool sourcePool;
@@ -204,18 +205,12 @@ class _TransferFormState extends State<TransferForm> {
                   });
                   return;
                 }
-
-                provider.addTransfer(
-                  inputAmount,
-                  DateTime.now(),
-                  widget.sourcePool,
-                  _selectedDestination,
-                  categoryId: needsCategoryPicker ? _selectedCategoryId : null,
-                  year: needsCategoryPicker ? _selectedYear : null,
-                  month: needsCategoryPicker ? _selectedMonth : null,
-                );
-
-                Navigator.of(context).pop();
+                if (needsCategoryPicker &&
+                    provider.isMonthClosed(_selectedYear, _selectedMonth)) {
+                  _showClosedMonthWarning(context, provider, inputAmount);
+                  return;
+                }
+                _performTransfer(provider, inputAmount);
               },
               child: const Text('Transfer'),
             ),
@@ -223,5 +218,55 @@ class _TransferFormState extends State<TransferForm> {
         ],
       ),
     );
+  }
+
+  void _showClosedMonthWarning(
+    BuildContext context,
+    BudgetProvider provider,
+    double amount,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Month is Closed'),
+          content: Text(
+            '${MONTHS[_selectedMonth - 1]} $_selectedYear is closed. You can\'t '
+            'allocate money to a closed month. Reopen it?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                provider.reopenMonth(_selectedYear, _selectedMonth);
+                Navigator.of(dialogContext).pop();
+                _performTransfer(provider, amount);
+              },
+              child: const Text('Reopen Month'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _performTransfer(BudgetProvider provider, double amount) {
+    final bool needsCategoryPicker =
+        _selectedDestination == FundPool.categoryBudget;
+
+    provider.addTransfer(
+      amount,
+      DateTime.now(),
+      widget.sourcePool,
+      _selectedDestination,
+      categoryId: needsCategoryPicker ? _selectedCategoryId : null,
+      year: needsCategoryPicker ? _selectedYear : null,
+      month: needsCategoryPicker ? _selectedMonth : null,
+    );
+
+    Navigator.of(context).pop();
   }
 }
