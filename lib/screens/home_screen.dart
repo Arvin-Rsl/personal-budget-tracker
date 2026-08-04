@@ -6,6 +6,7 @@ import '../app.dart';
 import '../widgets/category_card.dart';
 import '../widgets/income_form.dart';
 import '../widgets/transaction_form.dart';
+import 'categories_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -180,7 +181,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: const Text('Categories'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  // TODO: push CategoriesScreen once built
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CategoriesScreen(),
+                    ),
+                  );
                 },
               ),
               const Divider(),
