@@ -5,6 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
 class BudgetProvider extends ChangeNotifier {
+  // TODO: Track closed months as a persisted Set<String> ("year-month" keys)
+
+  // TODO: closeMonth(year, month) - for each category, transfer
+  // (allocated - spent) back to Unallocated Funds if positive; mark closed
+
+  // TODO: reopenMonth(year, month) - just unmark closed; refund transfer
+  // stays in history (transfers aren't reversed, only offset)
+
+  // TODO: isMonthClosed(year, month) getter-style check
+
+  // TODO: On load, auto-close any month older than "previous month"
+  // relative to today, based on months with existing category-budget transfers
+
   // TODO: deleteCategory() must generate Transfer(s) moving that category's allocated budget (unspent) back to Unallocated Funds before removing it
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
