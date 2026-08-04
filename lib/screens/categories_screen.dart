@@ -39,6 +39,13 @@ class CategoriesScreen extends StatelessWidget {
                       });
                       return;
                     }
+                    if (provider.categoryNameExists(name)) {
+                      setDialogState(() {
+                        errorText = 'A category with this name already exists';
+                      });
+                      return;
+                    }
+
                     provider.addCategory(name);
                     Navigator.of(context).pop();
                   },
@@ -83,6 +90,12 @@ class CategoriesScreen extends StatelessWidget {
                     if (name.isEmpty) {
                       setDialogState(() {
                         errorText = 'Name cannot be empty';
+                      });
+                      return;
+                    }
+                    if (name.toLowerCase() != category.name.toLowerCase() && provider.categoryNameExists(name)) {
+                      setDialogState(() {
+                        errorText = 'A category with this name already exists';
                       });
                       return;
                     }

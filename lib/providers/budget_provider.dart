@@ -256,7 +256,18 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool categoryNameExists(String name) {
+    final normalized = name.trim().toLowerCase();
+    return _categories.any(
+      (category) => category.name.trim().toLowerCase() == normalized,
+    );
+  }
+
   void addCategory(String name) {
+    if (categoryNameExists(name)) {
+      debugPrint("addCategory: a category named \"$name\" already exists");
+      return;
+    }
     final newCategory = Category(id: DateTime.now().toString(), name: name);
     _categories.add(newCategory);
     _saveData();
