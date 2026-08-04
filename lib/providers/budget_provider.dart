@@ -92,7 +92,7 @@ class BudgetProvider extends ChangeNotifier {
     return allocated;
   }
 
-  double getTotalBudget(int year, int month) {
+  double getTotalMonthlyBudget(int year, int month) {
     double totalBudget = 0;
     for (Category category in categories) {
       totalBudget += getAllocatedBudgetForCategoryAndMonth(
@@ -115,7 +115,7 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   double getOverallRemainingBudgetForMonth(int year, int month) {
-    return getTotalBudget(year, month) - getTotalSpentForMonth(year, month);
+    return getTotalMonthlyBudget(year, month) - getTotalSpentForMonth(year, month);
   }
 
   double getAmountSpentForCategoryAndMonth(

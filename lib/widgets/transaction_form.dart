@@ -93,7 +93,7 @@ class _TransactionFormState extends State<TransactionForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.transactionToEdit != null ? 'Edit Cost' : 'Add Cost',
+            widget.transactionToEdit != null ? 'Edit Cost' : 'Add Expense',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -229,7 +229,7 @@ class _TransactionFormState extends State<TransactionForm> {
                 Navigator.of(context).pop();
               },
               child: Text(
-                widget.transactionToEdit != null ? 'Save' : 'Add Cost',
+                widget.transactionToEdit != null ? 'Save' : 'Add Expense',
               ),
             ),
           ),

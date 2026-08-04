@@ -98,7 +98,9 @@ class _TransferFormState extends State<TransferForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Transfer from ${_labelFor(widget.sourcePool)}',
+            widget.allowedDestinations.length > 1
+                ? 'Transfer from ${_labelFor(widget.sourcePool)}'
+                : 'Transfer from ${_labelFor(widget.sourcePool)} to ${_labelFor(widget.allowedDestinations.first)}',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),

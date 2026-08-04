@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
       targetYear,
       targetMonth,
     );
-    final double totalBudget = provider.getTotalBudget(targetYear, targetMonth);
+    final double totalBudget = provider.getTotalMonthlyBudget(targetYear, targetMonth);
 
     return Scaffold(
       appBar: AppBar(
@@ -104,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Theme',
             onPressed: () => _showThemeSettingsDialog(context),
           ),
-          // TODO: Instead of icon, clicking on the current month in the appbar should call the _showMonthPickerDialog
           IconButton(
             icon: const Icon(Icons.calendar_month, size: 28),
             tooltip: 'Change Month',
