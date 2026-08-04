@@ -1,9 +1,12 @@
-// TODO: Remove allocatedBudget from Category; budget now comes from getAllocatedBudgetForCategoryAndMonth() (derived from Transfers)
 class Category {
   final String id;
-  final String name;
+  String name;
 
   Category({required this.id, required this.name});
+
+  void rename(String newName) {
+    this.name = newName;
+  }
 }
 
 class Transaction {

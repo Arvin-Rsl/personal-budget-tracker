@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
 class BudgetProvider extends ChangeNotifier {
-
   // TODO: Make _categories persistable instead of hardcoded; add addCategory(), renameCategory(), deleteCategory() methods
   // TODO: deleteCategory() must generate Transfer(s) moving that category's allocated budget (every month it has one) back to Unallocated Funds before removing it
-  final List<Category> _categories = [
+  List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
     Category(id: '2', name: 'Student Fees'),
     Category(id: '3', name: 'Books, Educational Supplies'),
@@ -118,7 +117,8 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   double getOverallRemainingBudgetForMonth(int year, int month) {
-    return getTotalMonthlyBudget(year, month) - getTotalSpentForMonth(year, month);
+    return getTotalMonthlyBudget(year, month) -
+        getTotalSpentForMonth(year, month);
   }
 
   double getAmountSpentForCategoryAndMonth(
@@ -252,6 +252,36 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addCategory(String name) {
+    final newCategory = Category(id: DateTime.now().toString(), name: name);
+    _categories.add(newCategory);
+    _saveData();
+    notifyListeners();
+  }
+
+  void renameCategory(String categoryId, String newName) {
+    final targetIndex = _categories.indexWhere(
+      (category) => category.id == categoryId,
+    );
+
+    if (targetIndex == -1) {
+      debugPrint("renameCategory: no category found with id $categoryId");
+      return;
+    }
+
+    _categories[targetIndex].rename(newName);
+    _saveData();
+    notifyListeners();
+  }
+
+  void deleteCategory(String categoryId) {
+    // TODO Move any unspent allocated budget back to Unallocated Funds before deleting
+
+    _categories.removeWhere((category) => category.id == categoryId);
+    _saveData();
+    notifyListeners();
+  }
+
   Future<void> _saveData() async {
     try {
       final file = await _getLocalStorageFile();
@@ -294,10 +324,15 @@ class BudgetProvider extends ChangeNotifier {
           )
           .toList();
 
+      final List<Map<String, dynamic>> categoriesData = _categories
+          .map((category) => {'id': category.id, 'name': category.name})
+          .toList();
+
       final Map<String, dynamic> structuredData = {
         'transactions': transactionsData,
         'incomes': incomesData,
         'transfers': transfersData,
+        'categories': categoriesData,
       };
 
       await file.writeAsString(jsonEncode(structuredData));
@@ -355,6 +390,13 @@ class BudgetProvider extends ChangeNotifier {
               ),
             )
             .toList();
+
+        final List<dynamic>? categoriesData = decodedData['categories'];
+        if (categoriesData != null) {
+          _categories = categoriesData
+              .map((item) => Category(id: item['id'], name: item['name']))
+              .toList();
+        }
 
         notifyListeners();
       }
