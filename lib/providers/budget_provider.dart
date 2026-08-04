@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
 class BudgetProvider extends ChangeNotifier {
-  // TODO: deleteCategory() must generate Transfer(s) moving that category's allocated budget (unspent) back to Unallocated Funds before removing it
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
     Category(id: '2', name: 'Student Fees'),
@@ -280,7 +279,45 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   void deleteCategory(String categoryId) {
-    // TODO Move any unspent allocated budget back to Unallocated Funds before deleting
+    // future TODO: refund the "predicted expenses" for future months too?
+    final now = DateTime.now();
+    final currentYear = now.year;
+    final currentMonth = now.month;
+
+    final previousMonthDate = DateTime(currentYear, currentMonth - 1);
+    final previousYear = previousMonthDate.year;
+    final previousMonth = previousMonthDate.month;
+
+    final List<(int, int)> monthsToCheck = [
+      (currentYear, currentMonth),
+      if (!isMonthClosed(previousYear, previousMonth))
+        (previousYear, previousMonth),
+    ];
+
+    for (final (year, month) in monthsToCheck) {
+      final allocated = getAllocatedBudgetForCategoryAndMonth(
+        categoryId,
+        year,
+        month,
+      );
+      final spent = getAmountSpentForCategoryAndMonth(categoryId, year, month);
+      final remaining = allocated - spent;
+
+      if (remaining > 0) {
+        _transfers.add(
+          Transfer(
+            id: '${DateTime.now().toIso8601String()}_delete_refund_${year}_$month',
+            amount: remaining,
+            date: DateTime.now(),
+            from: FundPool.categoryBudget,
+            to: FundPool.unallocatedFunds,
+            categoryId: categoryId,
+            year: year,
+            month: month,
+          ),
+        );
+      }
+    }
 
     _categories.removeWhere((category) => category.id == categoryId);
     _saveData();
