@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
 class BudgetProvider extends ChangeNotifier {
-  // TODO: Make _categories persistable instead of hardcoded; add addCategory(), renameCategory(), deleteCategory() methods
-  // TODO: deleteCategory() must generate Transfer(s) moving that category's allocated budget (every month it has one) back to Unallocated Funds before removing it
+  // TODO: deleteCategory() must generate Transfer(s) moving that category's allocated budget (unspent) back to Unallocated Funds before removing it
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
     Category(id: '2', name: 'Student Fees'),
