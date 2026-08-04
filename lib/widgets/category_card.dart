@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/budget_models.dart';
+import '../providers/budget_provider.dart';
 import 'transaction_tile.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -8,6 +9,7 @@ class CategoryCard extends StatelessWidget {
   final double spentAmount;
   final List<Transaction> transactions;
   final bool isExpanded;
+  final bool isMonthClosed;
   final VoidCallback onTap;
   final ValueChanged<Transaction> onEditTransaction;
   final ValueChanged<String> onDeleteTransaction;
@@ -19,6 +21,7 @@ class CategoryCard extends StatelessWidget {
     required this.spentAmount,
     required this.transactions,
     required this.isExpanded,
+    required this.isMonthClosed,
     required this.onTap,
     required this.onEditTransaction,
     required this.onDeleteTransaction,
@@ -87,7 +90,9 @@ class CategoryCard extends StatelessWidget {
                 backgroundColor: Theme.of(
                   context,
                 ).colorScheme.surfaceContainerHighest,
-                color: _getProgressColor(context, percentSpent),
+                color: isMonthClosed
+                    ? Theme.of(context).colorScheme.secondary
+                    : _getProgressColor(context, percentSpent),
               ),
               if (isExpanded) ...[
                 const SizedBox(height: 16),
