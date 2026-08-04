@@ -34,6 +34,7 @@ class BudgetProvider extends ChangeNotifier {
   List<Transaction> _transactions = [];
   List<Income> _incomes = [];
   List<Transfer> _transfers = [];
+  Set<String> _closedMonths = {};
 
   List<Category> get categories => _categories;
 
@@ -42,6 +43,11 @@ class BudgetProvider extends ChangeNotifier {
   List<Income> get incomes => _incomes;
 
   List<Transfer> get transfers => _transfers;
+
+  String _monthKey(int year, int month) => '$year-$month';
+
+  bool isMonthClosed(int year, int month) =>
+      _closedMonths.contains(_monthKey(year, month));
 
   BudgetProvider() {
     _loadData();
@@ -294,6 +300,64 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void closeMonth(int year, int month) {
+    for (final category in _categories) {
+      final allocated = getAllocatedBudgetForCategoryAndMonth(
+        category.id,
+        year,
+        month,
+      );
+      final spent = getAmountSpentForCategoryAndMonth(category.id, year, month);
+      final remaining = allocated - spent;
+
+      if (remaining > 0) {
+        _transfers.add(
+          Transfer(
+            id: '${DateTime.now().toIso8601String()}_close_${category.id}',
+            amount: remaining,
+            date: DateTime.now(),
+            from: FundPool.categoryBudget,
+            to: FundPool.unallocatedFunds,
+            categoryId: category.id,
+            year: year,
+            month: month,
+          ),
+        );
+      }
+    }
+
+    _closedMonths.add(_monthKey(year, month));
+    _saveData();
+    notifyListeners();
+  }
+
+  void reopenMonth(int year, int month) {
+    final monthsAgo =
+        12 * (DateTime.now().year - year) + DateTime.now().month - month;
+
+    if (monthsAgo > 24) {
+      debugPrint("reopenMonth: cannot reopen month older than 2 years ago");
+      return;
+    }
+
+    _closedMonths.remove(_monthKey(year, month));
+    _saveData();
+    notifyListeners();
+  }
+
+  void _autoCloseOldMonths() {
+    final now = DateTime.now();
+
+    for (int monthsAgo = 2; monthsAgo <= 24; monthsAgo++) {
+      final targetDate = DateTime(now.year, now.month - monthsAgo);
+      final key = _monthKey(targetDate.year, targetDate.month);
+
+      if (!_closedMonths.contains(key)) {
+        closeMonth(targetDate.year, targetDate.month);
+      }
+    }
+  }
+
   Future<void> _saveData() async {
     try {
       final file = await _getLocalStorageFile();
@@ -345,6 +409,7 @@ class BudgetProvider extends ChangeNotifier {
         'incomes': incomesData,
         'transfers': transfersData,
         'categories': categoriesData,
+        'closedMonths': _closedMonths.toList(),
       };
 
       await file.writeAsString(jsonEncode(structuredData));
@@ -409,6 +474,13 @@ class BudgetProvider extends ChangeNotifier {
               .map((item) => Category(id: item['id'], name: item['name']))
               .toList();
         }
+        
+        final List<dynamic>? closedMonthsData = decodedData['closedMonths'];
+        if (closedMonthsData != null) {
+          _closedMonths = closedMonthsData.map((e) => e as String).toSet();
+        }
+
+        _autoCloseOldMonths();
 
         notifyListeners();
       }
