@@ -56,7 +56,17 @@ class _HomeScreenState extends State<HomeScreen> {
       targetYear,
       targetMonth,
     );
-    final double totalBudget = provider.getTotalMonthlyBudget(targetYear, targetMonth);
+    final double totalBudget = provider.getTotalMonthlyBudget(
+      targetYear,
+      targetMonth,
+    );
+
+    final bool isClosed = provider.isMonthClosed(targetYear, targetMonth);
+    final int monthsAgo =
+        (DateTime.now().year - targetYear) * 12 +
+        DateTime.now().month -
+        targetMonth;
+    final bool isPreviousMonth = monthsAgo == 1;
 
     return Scaffold(
       appBar: AppBar(
@@ -79,6 +89,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 8),
             Text('${_getMonthName(targetMonth)} $targetYear'),
+            if (isClosed) ...[
+              const SizedBox(width: 6),
+              Text(
+                '(Closed)',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.chevron_right, size: 24),
@@ -185,6 +205,27 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isPreviousMonth && !isClosed) ...[
+              Card(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                child: ListTile(
+                  leading: const Icon(Icons.event_busy),
+                  title: Text(
+                    '${_getMonthName(targetMonth)} $targetYear has ended',
+                  ),
+                  subtitle: const Text(
+                    'Wrap up this month? Unspent budget moves to Unallocated Funds.',
+                  ),
+                  trailing: FilledButton(
+                    onPressed: () {
+                      provider.closeMonth(targetYear, targetMonth);
+                    },
+                    child: const Text('Close'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             Card(
               elevation: 4,
               child: Padding(
@@ -318,11 +359,59 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add',
-        onPressed: () => _showAddOptions(context),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: isClosed
+          ? FloatingActionButton(
+              tooltip: 'Month Closed',
+              onPressed: () => _showClosedMonthDialog(
+                context,
+                targetYear,
+                targetMonth,
+                monthsAgo,
+              ),
+              child: const Icon(Icons.priority_high),
+            )
+          : FloatingActionButton(
+              tooltip: 'Add',
+              onPressed: () => _showAddOptions(context),
+              child: const Icon(Icons.add),
+            ),
+    );
+  }
+
+  void _showClosedMonthDialog(
+    BuildContext context,
+    int year,
+    int month,
+    int monthsAgo,
+  ) {
+    final provider = BudgetState.of(context);
+    final bool canReopen = monthsAgo <= 24;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Month Closed'),
+          content: Text(
+            '${_getMonthName(month)} $year has been closed. Any unspent '
+            'budget was moved to Unallocated Funds.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+            if (canReopen)
+              TextButton(
+                onPressed: () {
+                  provider.reopenMonth(year, month);
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Reopen Month'),
+              ),
+          ],
+        );
+      },
     );
   }
 
