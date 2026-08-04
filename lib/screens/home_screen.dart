@@ -7,8 +7,9 @@ import '../widgets/category_card.dart';
 import '../widgets/income_form.dart';
 import '../widgets/transaction_form.dart';
 
-// TODO: Add endDrawer with Home/Unallocated Funds/Savings/Categories/Settings
-// TODO: Remove the Unallocated Funds/Savings summary Card - moving to drawer/dedicated screens instead
+// TODO: Show "wrap up this month?" banner when viewing the previous month and it isn't closed yet
+// TODO: Show "(Closed)" label next to month name in AppBar when the viewed month is closed
+// TODO: Replace '+' FAB with a '(!)' FAB when the viewed month is closed; tapping it shows a Month Closed dialog with Reopen option
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
