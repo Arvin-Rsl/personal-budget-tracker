@@ -55,8 +55,8 @@ class UnallocatedFundsScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   'Money that\'s available but not yet assigned anywhere. '
-                  'Move it into Savings to set it aside, or allocate it to '
-                  'a category\'s budget for a chosen month.',
+                  'You can move it into Savings to set it aside, allocate it to '
+                  'a category\'s budget for a chosen month, or just keep it here!',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
