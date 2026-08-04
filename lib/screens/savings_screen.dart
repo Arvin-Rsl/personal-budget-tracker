@@ -13,33 +13,56 @@ class SavingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Savings')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '\$${balance.toStringAsFixed(2)}',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              icon: const Icon(Icons.swap_horiz),
-              label: const Text('Transfer'),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) => TransferForm(
-                    sourcePool: FundPool.savings,
-                    allowedDestinations: const [FundPool.unallocatedFunds],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '\$${balance.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.displayMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 48),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.swap_horiz),
+                        label: const Text('Transfer'),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) => const TransferForm(
+                              sourcePool: FundPool.savings,
+                              allowedDestinations: [FundPool.unallocatedFunds],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  'Money you\'re setting aside to leave untouched. It stays '
+                  'accessible though: you can transfer it back to Unallocated Funds '
+                  'whenever a need comes up.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
