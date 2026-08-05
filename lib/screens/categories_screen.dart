@@ -93,7 +93,8 @@ class CategoriesScreen extends StatelessWidget {
                       });
                       return;
                     }
-                    if (name.toLowerCase() != category.name.toLowerCase() && provider.categoryNameExists(name)) {
+                    if (name.toLowerCase() != category.name.toLowerCase() &&
+                        provider.categoryNameExists(name)) {
                       setDialogState(() {
                         errorText = 'A category with this name already exists';
                       });
@@ -151,8 +152,9 @@ class CategoriesScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Categories')),
-      body: ListView.builder(
+      body: ListView.separated(
         itemCount: provider.categories.length,
+        separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final category = provider.categories[index];
           return ListTile(
