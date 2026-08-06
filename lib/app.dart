@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:personal_budget_app/providers/budget_provider.dart';
 import 'budget_state.dart';
 import 'screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppThemeColor {
   teal('Teal', Colors.teal),
@@ -60,6 +61,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _budgetProvider = BudgetProvider();
+    _loadThemePreferences();
   }
 
   @override
@@ -68,16 +70,39 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  Future<void> _loadThemePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final String? savedThemeMode = prefs.getString('themeMode');
+    final String? savedColor = prefs.getString('activeColor');
+
+    setState(() {
+      if (savedThemeMode != null) {
+        _themeMode = ThemeMode.values.byName(savedThemeMode);
+      }
+      if (savedColor != null) {
+        _activeColor = AppThemeColor.values.byName(savedColor);
+      }
+    });
+  }
+
+  Future<void> _saveThemePreference(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
   void changeThemeMode(ThemeMode mode) {
     setState(() {
       _themeMode = mode;
     });
+    _saveThemePreference('themeMode', mode.name);
   }
 
   void changeColorTheme(AppThemeColor color) {
     setState(() {
       _activeColor = color;
     });
+    _saveThemePreference('activeColor', color.name);
   }
 
   @override
