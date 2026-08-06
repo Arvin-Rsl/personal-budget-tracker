@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../budget_state.dart';
 import '../models/budget_models.dart';
+import '../providers/budget_provider.dart';
 
 class TransactionForm extends StatefulWidget {
   final DateTime currentViewedMonth;
@@ -179,7 +180,7 @@ class _TransactionFormState extends State<TransactionForm> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () {
+              onPressed: () async {
                 final String inputDescription = _descriptionController.text
                     .trim();
                 final double? inputAmount = double.tryParse(
@@ -205,18 +206,68 @@ class _TransactionFormState extends State<TransactionForm> {
                   return;
                 }
 
+                final int targetYear = _selectedDate.year;
+                final int targetMonth = _selectedDate.month;
+
+                final double allocated = provider
+                    .getAllocatedBudgetForCategoryAndMonth(
+                      _selectedCategoryId!,
+                      targetYear,
+                      targetMonth,
+                    );
+                final double alreadySpent = _effectiveAlreadySpent(
+                  provider,
+                  _selectedCategoryId!,
+                  targetYear,
+                  targetMonth,
+                );
+                final double shortfall =
+                    (alreadySpent + inputAmount!) - allocated;
+
+                if (shortfall > 0) {
+                  final bool monthIsClosed = provider.isMonthClosed(
+                    targetYear,
+                    targetMonth,
+                  );
+                  final double unallocated = provider
+                      .getUnallocatedFundsBalance();
+
+                  final bool canTopUp =
+                      !monthIsClosed && unallocated >= shortfall;
+
+                  final bool shouldProceed = await _showOverBudgetDialog(
+                    context: context,
+                    shortfall: shortfall,
+                    canTopUp: canTopUp,
+                  );
+
+                  if (!shouldProceed) return;
+
+                  if (canTopUp) {
+                    provider.addTransfer(
+                      shortfall,
+                      DateTime.now(),
+                      FundPool.unallocatedFunds,
+                      FundPool.categoryBudget,
+                      categoryId: _selectedCategoryId,
+                      year: targetYear,
+                      month: targetMonth,
+                    );
+                  }
+                }
+
                 if (widget.transactionToEdit != null) {
                   provider.editTransaction(
                     widget.transactionToEdit!.id,
                     inputDescription,
-                    inputAmount!,
+                    inputAmount,
                     _selectedCategoryId!,
                     _selectedDate,
                   );
                 } else {
                   provider.addTransaction(
                     inputDescription,
-                    inputAmount!,
+                    inputAmount,
                     _selectedCategoryId!,
                     _selectedDate,
                   );
@@ -236,5 +287,64 @@ class _TransactionFormState extends State<TransactionForm> {
         ],
       ),
     );
+  }
+
+  double _effectiveAlreadySpent(
+    BudgetProvider provider,
+    String categoryId,
+    int year,
+    int month,
+  ) {
+    double alreadySpent = provider.getAmountSpentForCategoryAndMonth(
+      categoryId,
+      year,
+      month,
+    );
+
+    final original = widget.transactionToEdit;
+    if (original != null &&
+        original.categoryId == categoryId &&
+        original.date.year == year &&
+        original.date.month == month) {
+      alreadySpent -= original.amount;
+    }
+
+    return alreadySpent;
+  }
+
+  Future<bool> _showOverBudgetDialog({
+    required BuildContext context,
+    required double shortfall,
+    required bool canTopUp,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Over Budget'),
+          content: Text(
+            canTopUp
+                ? 'This expense goes \$${shortfall.toStringAsFixed(2)} over budget '
+                      'for this category. Cover it from Unallocated Funds?'
+                : 'This expense goes \$${shortfall.toStringAsFixed(2)} over budget '
+                      'for this category, and there isn\'t enough in Unallocated Funds '
+                      'to cover it.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            if (canTopUp)
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Cover Shortfall'),
+              ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
   }
 }
