@@ -4,6 +4,23 @@ import 'budget_state.dart';
 import 'screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// TODO: two parts for preferences (date, color)
+// TODO: move the theme changing code to here instead of App.dart
+// TODO: Add DateFormatOption enum + a manual formatDate() helper
+// (no intl package - keep dependency-free, matches existing manual
+// date formatting style in TransactionTile/TransactionForm)
+
+// TODO: Add dateFormat state to _MyAppState, persisted like theme
+
+// TODO: Add ThemeMode.system option to the theme picker
+
+// TODO: Build SettingsScreen containing ThemeSettingsSection and
+// DateFormatSettingsSection as separate widgets
+
+// TODO: Wire Settings into the drawer
+
+// TODO: finalize color choices (maybe check the UX Book on Colors too)
+
 enum AppThemeColor {
   teal('Teal', Colors.teal),
   purple('Purple', Colors.purple),
