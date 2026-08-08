@@ -4,6 +4,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
+// TODO: Add getPredictedAmountForCategoryAndMonth() - sums only isConfirmed == false transactions
+
+// TODO: Add confirmTransaction(id) - flips isConfirmed to true
+
 class BudgetProvider extends ChangeNotifier {
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),

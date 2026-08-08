@@ -8,7 +8,7 @@ class Category {
     this.name = newName;
   }
 }
-
+// TODO: Add isConfirmed bool to Transaction (true = real expense, false = predicted).
 class Transaction {
   String id;
   String description;
