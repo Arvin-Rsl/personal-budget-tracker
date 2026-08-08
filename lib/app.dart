@@ -3,8 +3,8 @@ import 'package:personal_budget_app/providers/budget_provider.dart';
 import 'budget_state.dart';
 import 'screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'utils/date_format_option.dart';
 
-// TODO: two parts for preferences (date, color)
 // TODO: move the theme changing code to here instead of App.dart
 // TODO: Add DateFormatOption enum + a manual formatDate() helper
 // (no intl package - keep dependency-free, matches existing manual
@@ -68,11 +68,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.dark;
   AppThemeColor _activeColor = AppThemeColor.teal;
+  DateFormatOption _dateFormat = DateFormatOption.isoStyle;
   late final BudgetProvider _budgetProvider;
 
   ThemeMode get themeMode => _themeMode;
 
   AppThemeColor get activeColor => _activeColor;
+
+  DateFormatOption get dateFormat => _dateFormat;
 
   @override
   void initState() {
@@ -92,6 +95,7 @@ class _MyAppState extends State<MyApp> {
 
     final String? savedThemeMode = prefs.getString('themeMode');
     final String? savedColor = prefs.getString('activeColor');
+    final String? savedDateFormat = prefs.getString('dateFormat');
 
     setState(() {
       if (savedThemeMode != null) {
@@ -100,10 +104,13 @@ class _MyAppState extends State<MyApp> {
       if (savedColor != null) {
         _activeColor = AppThemeColor.values.byName(savedColor);
       }
+      if (savedDateFormat != null) {
+        _dateFormat = DateFormatOption.values.byName(savedDateFormat);
+      }
     });
   }
 
-  Future<void> _saveThemePreference(String key, String value) async {
+  Future<void> _savePreference(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
   }
@@ -112,14 +119,21 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _themeMode = mode;
     });
-    _saveThemePreference('themeMode', mode.name);
+    _savePreference('themeMode', mode.name);
   }
 
   void changeColorTheme(AppThemeColor color) {
     setState(() {
       _activeColor = color;
     });
-    _saveThemePreference('activeColor', color.name);
+    _savePreference('activeColor', color.name);
+  }
+
+  void changeDateFormat(DateFormatOption option) {
+    setState(() {
+      _dateFormat = option;
+    });
+    _savePreference('dateFormat', option.name);
   }
 
   @override

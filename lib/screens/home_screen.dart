@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/screens/savings_screen.dart';
+import 'package:personal_budget_app/screens/settings_screen.dart';
 import 'package:personal_budget_app/screens/unallocated_funds_screen.dart';
 import '../budget_state.dart';
 import '../app.dart';
@@ -116,12 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          // TODO: the Theme selection should be placed in settings from now on
-          IconButton(
-            icon: const Icon(Icons.palette_outlined, size: 26),
-            tooltip: 'Theme',
-            onPressed: () => _showThemeSettingsDialog(context),
-          ),
           IconButton(
             icon: const Icon(Icons.calendar_month, size: 28),
             tooltip: 'Change Month',
@@ -194,7 +189,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: const Text('Settings'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  // TODO: push SettingsScreen once built
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
                 },
               ),
             ],
@@ -415,94 +414,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 child: const Text('Reopen Month'),
               ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showThemeSettingsDialog(BuildContext context) {
-    final themeState = MyApp.of(context);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Theme Settings'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Display Mode',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<ThemeMode>(
-                segments: const [
-                  ButtonSegment(
-                    value: ThemeMode.light,
-                    icon: Icon(Icons.light_mode),
-                    label: Text('Light'),
-                  ),
-                  ButtonSegment(
-                    value: ThemeMode.dark,
-                    icon: Icon(Icons.dark_mode),
-                    label: Text('Dark'),
-                  ),
-                ],
-                selected: {themeState.themeMode},
-                onSelectionChanged: (Set<ThemeMode> selection) {
-                  themeState.changeThemeMode(selection.first);
-                },
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Accent Color Palette',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<AppThemeColor>(
-                initialValue: themeState.activeColor,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                ),
-                items: AppThemeColor.values.map((AppThemeColor color) {
-                  return DropdownMenuItem<AppThemeColor>(
-                    value: color,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: color.seedColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(color.label),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (AppThemeColor? newColor) {
-                  if (newColor != null) {
-                    themeState.changeColorTheme(newColor);
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
           ],
         );
       },
