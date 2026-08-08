@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:personal_budget_app/app.dart';
 import '../models/budget_models.dart';
+import '../utils/date_format_option.dart';
 
 class TransactionTile extends StatelessWidget {
   final Transaction transaction;
@@ -29,7 +31,7 @@ class TransactionTile extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  '${transaction.date.year}-${transaction.date.month.toString().padLeft(2, '0')}-${transaction.date.day.toString().padLeft(2, '0')}',
+                  formatDate(transaction.date, MyApp.of(context).dateFormat),
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],

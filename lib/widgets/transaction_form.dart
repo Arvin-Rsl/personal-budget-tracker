@@ -2,6 +2,27 @@ import 'package:flutter/material.dart';
 import '../budget_state.dart';
 import '../models/budget_models.dart';
 import '../providers/budget_provider.dart';
+import '../app.dart';
+import '../utils/date_format_option.dart';
+
+const List<String> _monthAbbreviations = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+String getMonthName(int month) {
+  return _monthAbbreviations[month - 1];
+}
 
 class TransactionForm extends StatefulWidget {
   final DateTime currentViewedMonth;
@@ -77,6 +98,8 @@ class _TransactionFormState extends State<TransactionForm> {
   @override
   Widget build(BuildContext context) {
     final provider = BudgetState.of(context);
+    final dateFormat = MyApp.of(context).dateFormat;
+
     _selectedCategoryId ??= provider.categories.first.id;
     final bool isDifferentMonth =
         _selectedDate.year != widget.currentViewedMonth.year ||
@@ -141,14 +164,14 @@ class _TransactionFormState extends State<TransactionForm> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Date: ${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
+                    'Date: ${formatDate(_selectedDate, dateFormat)}',
                     style: const TextStyle(fontSize: 16),
                   ),
                   if (isDifferentMonth)
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
-                        '💡 Saving will switch view to month ${_selectedDate.month}/${_selectedDate.year}',
+                        '💡 Saving will switch view to month ${getMonthName(_selectedDate.month)}/${_selectedDate.year}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.primary,
