@@ -4,10 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
-// TODO: Add getPredictedAmountForCategoryAndMonth() - sums only isConfirmed == false transactions
-
-// TODO: Add confirmTransaction(id) - flips isConfirmed to true
-
 class BudgetProvider extends ChangeNotifier {
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
@@ -140,7 +136,25 @@ class BudgetProvider extends ChangeNotifier {
       year,
       month,
     )) {
-      total += transaction.amount;
+      if (transaction.isConfirmed) total += transaction.amount;
+    }
+    return total;
+  }
+
+  double getPredictedAmountForCategoryAndMonth(
+    String categoryId,
+    int year,
+    int month,
+  ) {
+    double total = 0.0;
+    for (Transaction transaction in getTransactionsForCategoryAndMonth(
+      categoryId,
+      year,
+      month,
+    )) {
+      if (!transaction.isConfirmed) {
+        total += transaction.amount;
+      }
     }
     return total;
   }
@@ -339,6 +353,23 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void confirmTransaction(String transactionId) {
+    final targetIndex = _transactions.indexWhere(
+      (transaction) => transaction.id == transactionId,
+    );
+
+    if (targetIndex == -1) {
+      debugPrint(
+        "confirmTransaction: no transaction found with id $transactionId",
+      );
+      return;
+    }
+
+    _transactions[targetIndex].isConfirmed = true;
+    _saveData();
+    notifyListeners();
+  }
+
   void closeMonth(int year, int month) {
     for (final category in _categories) {
       final allocated = getAllocatedBudgetForCategoryAndMonth(
@@ -409,6 +440,7 @@ class BudgetProvider extends ChangeNotifier {
               'amount': transaction.amount,
               'date': transaction.date.toIso8601String(),
               'categoryId': transaction.categoryId,
+              'isConfirmed': transaction.isConfirmed,
             },
           )
           .toList();
@@ -475,6 +507,7 @@ class BudgetProvider extends ChangeNotifier {
                 amount: (item['amount'] as num).toDouble(),
                 date: DateTime.parse(item['date']),
                 categoryId: item['categoryId'],
+                isConfirmed: item['isConfirmed'] ?? true,
               ),
             )
             .toList();

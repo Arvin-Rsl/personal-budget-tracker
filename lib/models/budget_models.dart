@@ -8,13 +8,14 @@ class Category {
     this.name = newName;
   }
 }
-// TODO: Add isConfirmed bool to Transaction (true = real expense, false = predicted).
+
 class Transaction {
   String id;
   String description;
   double amount;
   DateTime date;
   String categoryId;
+  bool isConfirmed;
 
   Transaction({
     required this.id,
@@ -22,6 +23,7 @@ class Transaction {
     required this.amount,
     required this.date,
     required this.categoryId,
+    this.isConfirmed = true,
   });
 }
 
