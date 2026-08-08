@@ -180,8 +180,9 @@ class BudgetProvider extends ChangeNotifier {
     String description,
     double amount,
     String categoryId,
-    DateTime selectedDate,
-  ) {
+    DateTime selectedDate, {
+    bool isConfirmed = true,
+  }) {
     final newTransaction = Transaction(
       // unique timestamp ID, for my (currently) offline local app
       id: DateTime.now().toString(),
@@ -189,6 +190,7 @@ class BudgetProvider extends ChangeNotifier {
       amount: amount,
       date: selectedDate,
       categoryId: categoryId,
+      isConfirmed: isConfirmed,
     );
 
     _transactions.add(newTransaction);

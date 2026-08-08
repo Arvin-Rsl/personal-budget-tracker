@@ -104,7 +104,7 @@ class _TransactionFormState extends State<TransactionForm> {
     final bool isDifferentMonth =
         _selectedDate.year != widget.currentViewedMonth.year ||
         _selectedDate.month != widget.currentViewedMonth.month;
-
+    final bool isFutureDate = _selectedDate.isAfter(DateTime.now());
     return Padding(
       padding: EdgeInsets.only(
         left: 24,
@@ -175,6 +175,17 @@ class _TransactionFormState extends State<TransactionForm> {
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  if (isFutureDate)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        '📅 This date is in the future — will be saved as a predicted expense',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.tertiary,
                         ),
                       ),
                     ),
@@ -254,28 +265,49 @@ class _TransactionFormState extends State<TransactionForm> {
                   );
                   final double unallocated = provider
                       .getUnallocatedFundsBalance();
-
                   final bool canTopUp =
                       !monthIsClosed && unallocated >= shortfall;
 
-                  final bool shouldProceed = await _showOverBudgetDialog(
-                    context: context,
-                    shortfall: shortfall,
-                    canTopUp: canTopUp,
-                  );
-
-                  if (!shouldProceed) return;
-
-                  if (canTopUp) {
-                    provider.addTransfer(
-                      shortfall,
-                      DateTime.now(),
-                      FundPool.unallocatedFunds,
-                      FundPool.categoryBudget,
-                      categoryId: _selectedCategoryId,
-                      year: targetYear,
-                      month: targetMonth,
+                  if (isFutureDate) {
+                    final bool? choice = await _showPredictedOverBudgetDialog(
+                      context: context,
+                      shortfall: shortfall,
+                      canTopUp: canTopUp,
                     );
+
+                    if (choice == false) return;
+
+                    if (choice == true) {
+                      provider.addTransfer(
+                        shortfall,
+                        DateTime.now(),
+                        FundPool.unallocatedFunds,
+                        FundPool.categoryBudget,
+                        categoryId: _selectedCategoryId,
+                        year: targetYear,
+                        month: targetMonth,
+                      );
+                    }
+                  } else {
+                    final bool shouldProceed = await _showOverBudgetDialog(
+                      context: context,
+                      shortfall: shortfall,
+                      canTopUp: canTopUp,
+                    );
+
+                    if (!shouldProceed) return;
+
+                    if (canTopUp) {
+                      provider.addTransfer(
+                        shortfall,
+                        DateTime.now(),
+                        FundPool.unallocatedFunds,
+                        FundPool.categoryBudget,
+                        categoryId: _selectedCategoryId,
+                        year: targetYear,
+                        month: targetMonth,
+                      );
+                    }
                   }
                 }
 
@@ -293,6 +325,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     inputAmount,
                     _selectedCategoryId!,
                     _selectedDate,
+                    isConfirmed: !isFutureDate,
                   );
                 }
 
@@ -369,5 +402,45 @@ class _TransactionFormState extends State<TransactionForm> {
     );
 
     return result ?? false;
+  }
+
+  // Returns: true = cover shortfall now, false = cancel entirely, null = proceed without covering
+  Future<bool?> _showPredictedOverBudgetDialog({
+    required BuildContext context,
+    required double shortfall,
+    required bool canTopUp,
+  }) async {
+    return showDialog<bool?>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Over Budget'),
+          content: Text(
+            canTopUp
+                ? 'This predicted expense goes \$${shortfall.toStringAsFixed(2)} over '
+                      'budget for this category. Cover it from Unallocated Funds now, or '
+                      'proceed without covering it yet?'
+                : 'This predicted expense goes \$${shortfall.toStringAsFixed(2)} over '
+                      'budget for this category, and there isn\'t enough in Unallocated '
+                      'Funds to cover it yet.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Proceed without covering'),
+            ),
+            if (canTopUp)
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Cover Shortfall'),
+              ),
+          ],
+        );
+      },
+    );
   }
 }
