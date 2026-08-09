@@ -4,6 +4,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
+// TODO: closeMonth() - if called interactively and month has
+  // unconfirmed predicted transactions, caller must confirm deletion
+  // first (handled in UI layer, not here)
+// TODO: _autoCloseOldMonths() - silently delete unconfirmed predicted
+  // transactions in months it sweeps, no prompt
 class BudgetProvider extends ChangeNotifier {
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
