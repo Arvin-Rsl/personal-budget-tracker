@@ -226,6 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
             ],
+            // TODO: Summary card shows Total Budget, Actual Spent, Predicted, and Remaining (Budget - Actual - Predicted)
             Card(
               elevation: 4,
               child: Padding(
