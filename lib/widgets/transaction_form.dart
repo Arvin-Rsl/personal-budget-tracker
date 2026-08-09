@@ -20,7 +20,22 @@ const List<String> _monthAbbreviations = [
   'Dec',
 ];
 
-String getMonthName(int month) {
+const List<String> _monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+String getMonthAbbreviation(int month) {
   return _monthAbbreviations[month - 1];
 }
 
@@ -105,6 +120,10 @@ class _TransactionFormState extends State<TransactionForm> {
         _selectedDate.year != widget.currentViewedMonth.year ||
         _selectedDate.month != widget.currentViewedMonth.month;
     final bool isFutureDate = _selectedDate.isAfter(DateTime.now());
+    final bool originalWasConfirmed =
+        widget.transactionToEdit?.isConfirmed ?? false;
+    final bool resultingIsConfirmed = originalWasConfirmed || !isFutureDate;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 24,
@@ -171,14 +190,14 @@ class _TransactionFormState extends State<TransactionForm> {
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
-                        '💡 Saving will switch view to month ${getMonthName(_selectedDate.month)}/${_selectedDate.year}',
+                        '💡 Saving will switch view to month ${getMonthAbbreviation(_selectedDate.month)}/${_selectedDate.year}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
-                  if (isFutureDate)
+                  if (!resultingIsConfirmed)
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
@@ -243,6 +262,21 @@ class _TransactionFormState extends State<TransactionForm> {
                 final int targetYear = _selectedDate.year;
                 final int targetMonth = _selectedDate.month;
 
+                bool monthIsClosed = provider.isMonthClosed(
+                  targetYear,
+                  targetMonth,
+                );
+
+                if (monthIsClosed) {
+                  final bool shouldReopen = await _showClosedMonthReopenDialog(
+                    context,
+                    targetYear,
+                    targetMonth,
+                  );
+                  if (!shouldReopen) return;
+                  provider.reopenMonth(targetYear, targetMonth);
+                  monthIsClosed = false;
+                }
                 final double allocated = provider
                     .getAllocatedBudgetForCategoryAndMonth(
                       _selectedCategoryId!,
@@ -259,16 +293,11 @@ class _TransactionFormState extends State<TransactionForm> {
                     (alreadySpent + inputAmount!) - allocated;
 
                 if (shortfall > 0) {
-                  final bool monthIsClosed = provider.isMonthClosed(
-                    targetYear,
-                    targetMonth,
-                  );
                   final double unallocated = provider
                       .getUnallocatedFundsBalance();
-                  final bool canTopUp =
-                      !monthIsClosed && unallocated >= shortfall;
+                  final bool canTopUp = unallocated >= shortfall;
 
-                  if (isFutureDate) {
+                  if (!resultingIsConfirmed) {
                     final bool? choice = await _showPredictedOverBudgetDialog(
                       context: context,
                       shortfall: shortfall,
@@ -318,6 +347,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     inputAmount,
                     _selectedCategoryId!,
                     _selectedDate,
+                    isConfirmed: resultingIsConfirmed,
                   );
                 } else {
                   provider.addTransaction(
@@ -325,7 +355,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     inputAmount,
                     _selectedCategoryId!,
                     _selectedDate,
-                    isConfirmed: !isFutureDate,
+                    isConfirmed: resultingIsConfirmed,
                   );
                 }
 
@@ -443,4 +473,34 @@ class _TransactionFormState extends State<TransactionForm> {
       },
     );
   }
+}
+
+Future<bool> _showClosedMonthReopenDialog(
+  BuildContext context,
+  int year,
+  int month,
+) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text('Month is Closed'),
+        content: Text(
+          '${_monthNames[month - 1]} $year is closed. You can\'t add an expense to '
+          'a closed month. Reopen it?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Reopen Month'),
+          ),
+        ],
+      );
+    },
+  );
+  return result ?? false;
 }

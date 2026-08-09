@@ -3,6 +3,7 @@ import 'package:personal_budget_app/screens/savings_screen.dart';
 import 'package:personal_budget_app/screens/settings_screen.dart';
 import 'package:personal_budget_app/screens/unallocated_funds_screen.dart';
 import '../budget_state.dart';
+import '../models/budget_models.dart';
 import '../widgets/category_card.dart';
 import '../widgets/income_form.dart';
 import '../widgets/transaction_form.dart';
@@ -363,7 +364,77 @@ class _HomeScreenState extends State<HomeScreen> {
                   onDeleteTransaction: (transactionId) {
                     provider.deleteTransaction(transactionId);
                   },
-                  onConfirmTransaction: (transactionId) {
+                  onConfirmTransaction: (transactionId) async {
+                    final transaction = provider.transactions.firstWhere(
+                      (t) => t.id == transactionId,
+                    );
+                    final year = transaction.date.year;
+                    final month = transaction.date.month;
+
+                    final allocated = provider
+                        .getAllocatedBudgetForCategoryAndMonth(
+                          transaction.categoryId,
+                          year,
+                          month,
+                        );
+                    final alreadySpent = provider
+                        .getAmountSpentForCategoryAndMonth(
+                          transaction.categoryId,
+                          year,
+                          month,
+                        );
+                    final shortfall =
+                        (alreadySpent + transaction.amount) - allocated;
+
+                    if (shortfall > 0) {
+                      final monthIsClosed = provider.isMonthClosed(year, month);
+                      final unallocated = provider.getUnallocatedFundsBalance();
+                      final canTopUp =
+                          !monthIsClosed && unallocated >= shortfall;
+
+                      final bool? choice = await showDialog<bool>(
+                        context: context,
+                        builder: (dialogContext) {
+                          return AlertDialog(
+                            title: const Text('Over Budget'),
+                            content: Text(
+                              canTopUp
+                                  ? 'Confirming this expense goes \$${shortfall.toStringAsFixed(2)} over '
+                                        'budget for this category. Cover it from Unallocated Funds?'
+                                  : 'Confirming this expense goes \$${shortfall.toStringAsFixed(2)} over '
+                                        'budget for this category, and there isn\'t enough in Unallocated '
+                                        'Funds to cover it.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              if (canTopUp)
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(dialogContext).pop(true),
+                                  child: const Text('Cover Shortfall'),
+                                ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (choice != true) return;
+
+                      provider.addTransfer(
+                        shortfall,
+                        DateTime.now(),
+                        FundPool.unallocatedFunds,
+                        FundPool.categoryBudget,
+                        categoryId: transaction.categoryId,
+                        year: year,
+                        month: month,
+                      );
+                    }
+
                     provider.confirmTransaction(transactionId);
                   },
                 );

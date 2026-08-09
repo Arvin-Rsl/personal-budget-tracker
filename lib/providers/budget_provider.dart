@@ -215,8 +215,9 @@ class BudgetProvider extends ChangeNotifier {
     String newDescription,
     double newAmount,
     String newCategoryId,
-    DateTime newDate,
-  ) {
+    DateTime newDate, {
+    bool? isConfirmed,
+  }) {
     final targetIndex = _transactions.indexWhere(
       (transaction) => transaction.id == transactionId,
     );
@@ -233,7 +234,9 @@ class BudgetProvider extends ChangeNotifier {
     targetTransaction.amount = newAmount;
     targetTransaction.categoryId = newCategoryId;
     targetTransaction.date = newDate;
-
+    if (isConfirmed != null) {
+      targetTransaction.isConfirmed = isConfirmed;
+    }
     _saveData();
     notifyListeners();
   }
