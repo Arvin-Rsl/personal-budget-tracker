@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/budget_models.dart';
-import '../providers/budget_provider.dart';
 import 'transaction_tile.dart';
 
 class CategoryCard extends StatelessWidget {

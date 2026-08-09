@@ -3,7 +3,6 @@ import 'package:personal_budget_app/screens/savings_screen.dart';
 import 'package:personal_budget_app/screens/settings_screen.dart';
 import 'package:personal_budget_app/screens/unallocated_funds_screen.dart';
 import '../budget_state.dart';
-import '../app.dart';
 import '../widgets/category_card.dart';
 import '../widgets/income_form.dart';
 import '../widgets/transaction_form.dart';
