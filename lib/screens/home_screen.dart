@@ -326,11 +326,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   targetYear,
                   targetMonth,
                 );
-
+                final predicted = provider
+                    .getPredictedAmountForCategoryAndMonth(
+                      category.id,
+                      targetYear,
+                      targetMonth,
+                    );
                 return CategoryCard(
                   category: category,
                   allocatedBudget: allocatedBudget,
                   spentAmount: spent,
+                  predictedAmount: predicted,
                   transactions: transactions,
                   isExpanded: isExpanded,
                   isMonthClosed: isMonthClosed,

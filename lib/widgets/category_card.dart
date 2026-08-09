@@ -6,6 +6,7 @@ class CategoryCard extends StatelessWidget {
   final Category category;
   final double allocatedBudget;
   final double spentAmount;
+  final double predictedAmount;
   final List<Transaction> transactions;
   final bool isExpanded;
   final bool isMonthClosed;
@@ -19,6 +20,7 @@ class CategoryCard extends StatelessWidget {
     required this.category,
     required this.allocatedBudget,
     required this.spentAmount,
+    required this.predictedAmount,
     required this.transactions,
     required this.isExpanded,
     required this.isMonthClosed,
@@ -91,17 +93,18 @@ class CategoryCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: percentSpent.clamp(0.0, 1.0),
-                minHeight: 8,
-                borderRadius: BorderRadius.circular(4),
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                color: isMonthClosed
-                    ? Theme.of(context).colorScheme.secondary
-                    : _getProgressColor(context, percentSpent),
-              ),
+              // LinearProgressIndicator(
+              //   value: percentSpent.clamp(0.0, 1.0),
+              //   minHeight: 8,
+              //   borderRadius: BorderRadius.circular(4),
+              //   backgroundColor: Theme.of(
+              //     context,
+              //   ).colorScheme.surfaceContainerHighest,
+              //   color: isMonthClosed
+              //       ? Theme.of(context).colorScheme.secondary
+              //       : _getProgressColor(context, percentSpent),
+              // ),
+              _buildSegmentedProgressBar(context, budget),
               if (isExpanded) ...[
                 const SizedBox(height: 16),
                 const Divider(),
@@ -138,6 +141,52 @@ class CategoryCard extends StatelessWidget {
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSegmentedProgressBar(BuildContext context, double budget) {
+    final double spentFraction = budget > 0
+        ? (spentAmount / budget).clamp(0.0, 1.0)
+        : 0.0;
+    final double predictedFraction = budget > 0
+        ? ((spentAmount + predictedAmount) / budget).clamp(0.0, 1.0) -
+              spentFraction
+        : 0.0;
+    final double emptyFraction = (1.0 - spentFraction - predictedFraction)
+        .clamp(0.0, 1.0);
+
+    final Color spentColor = isMonthClosed
+        ? Theme.of(context).colorScheme.primary
+        : _getProgressColor(context, spentAmount / (budget > 0 ? budget : 1));
+    final Color predictedColor = Theme.of(context).colorScheme.onSecondaryFixedVariant;
+    final Color emptyColor = Theme.of(
+      context,
+    ).colorScheme.surfaceContainerHighest;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: SizedBox(
+        height: 8,
+        child: Row(
+          children: [
+            if (spentFraction > 0)
+              Expanded(
+                flex: (spentFraction * 1000).round(),
+                child: Container(color: spentColor),
+              ),
+            if (predictedFraction > 0)
+              Expanded(
+                flex: (predictedFraction * 1000).round(),
+                child: Container(color: predictedColor),
+              ),
+            if (emptyFraction > 0)
+              Expanded(
+                flex: (emptyFraction * 1000).round(),
+                child: Container(color: emptyColor),
+              ),
+          ],
         ),
       ),
     );
