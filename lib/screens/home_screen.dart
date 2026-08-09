@@ -58,6 +58,14 @@ class _HomeScreenState extends State<HomeScreen> {
       targetYear,
       targetMonth,
     );
+    double totalPredicted = 0.0;
+    for (final category in provider.categories) {
+      totalPredicted += provider.getPredictedAmountForCategoryAndMonth(
+        category.id,
+        targetYear,
+        targetMonth,
+      );
+    }
 
     final bool isClosed = provider.isMonthClosed(targetYear, targetMonth);
     final int monthsAgo =
@@ -226,7 +234,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            // TODO: Summary card shows Total Budget, Actual Spent, Predicted, and Remaining (Budget - Actual - Predicted)
             Card(
               elevation: 4,
               child: Padding(
@@ -275,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Column(
                           children: [
                             const Text(
-                              'Total Spent',
+                              'Actual Spent',
                               style: TextStyle(fontSize: 12),
                             ),
                             const SizedBox(height: 4),
@@ -284,6 +291,26 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              'Predicted',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$${totalPredicted.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.orange.shade700,
                               ),
                             ),
                           ],

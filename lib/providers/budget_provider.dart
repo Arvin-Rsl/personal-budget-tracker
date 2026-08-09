@@ -113,7 +113,9 @@ class BudgetProvider extends ChangeNotifier {
   double getTotalSpentForMonth(int year, int month) {
     double total = 0.0;
     for (Transaction transaction in _transactions) {
-      if (year == transaction.date.year && month == transaction.date.month) {
+      if (transaction.isConfirmed &&
+          year == transaction.date.year &&
+          month == transaction.date.month) {
         total += transaction.amount;
       }
     }
@@ -121,8 +123,17 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   double getOverallRemainingBudgetForMonth(int year, int month) {
+    double totalPredicted = 0.0;
+    for (final category in categories) {
+      totalPredicted += getPredictedAmountForCategoryAndMonth(
+        category.id,
+        year,
+        month,
+      );
+    }
     return getTotalMonthlyBudget(year, month) -
-        getTotalSpentForMonth(year, month);
+        getTotalSpentForMonth(year, month) -
+        totalPredicted;
   }
 
   double getAmountSpentForCategoryAndMonth(
