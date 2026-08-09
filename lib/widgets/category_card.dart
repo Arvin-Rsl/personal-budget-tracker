@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/budget_models.dart';
 import 'transaction_tile.dart';
 
-// TODO: sort transactions predicted-first before rendering
 class CategoryCard extends StatelessWidget {
   final Category category;
   final double allocatedBudget;
@@ -13,6 +12,7 @@ class CategoryCard extends StatelessWidget {
   final VoidCallback onTap;
   final ValueChanged<Transaction> onEditTransaction;
   final ValueChanged<String> onDeleteTransaction;
+  final ValueChanged<String> onConfirmTransaction;
 
   const CategoryCard({
     super.key,
@@ -25,6 +25,7 @@ class CategoryCard extends StatelessWidget {
     required this.onTap,
     required this.onEditTransaction,
     required this.onDeleteTransaction,
+    required this.onConfirmTransaction,
   });
 
   Color _getProgressColor(BuildContext context, double percent) {
@@ -43,6 +44,13 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final double budget = allocatedBudget;
     final double percentSpent = budget > 0 ? (spentAmount / budget) : 0.0;
+    final sortedTransactions = [...transactions]
+      ..sort((a, b) {
+        if (a.isConfirmed != b.isConfirmed) {
+          return a.isConfirmed ? 1 : -1;
+        }
+        return b.date.compareTo(a.date);
+      });
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
@@ -118,11 +126,12 @@ class CategoryCard extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: transactions.length,
                     itemBuilder: (context, index) {
-                      final transaction = transactions[index];
+                      final transaction = sortedTransactions[index];
                       return TransactionTile(
                         transaction: transaction,
                         onEdit: () => onEditTransaction(transaction),
                         onDelete: () => onDeleteTransaction(transaction.id),
+                        onConfirm: () => onConfirmTransaction(transaction.id),
                       );
                     },
                   ),

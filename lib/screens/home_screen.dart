@@ -357,6 +357,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   onDeleteTransaction: (transactionId) {
                     provider.deleteTransaction(transactionId);
                   },
+                  onConfirmTransaction: (transactionId) {
+                    provider.confirmTransaction(transactionId);
+                  },
                 );
               },
             ),

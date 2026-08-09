@@ -8,12 +8,14 @@ class TransactionTile extends StatelessWidget {
   final Transaction transaction;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onConfirm;
 
   const TransactionTile({
     super.key,
     required this.transaction,
     required this.onEdit,
     required this.onDelete,
+    required this.onConfirm,
   });
 
   @override
@@ -44,10 +46,19 @@ class TransactionTile extends StatelessWidget {
                 '-\$${transaction.amount.toStringAsFixed(2)}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.error,
+                  color: transaction.isConfirmed? Theme.of(context).colorScheme.error:Colors.orange.shade700,
                 ),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 12),
+              if (!transaction.isConfirmed)
+                IconButton(
+                  icon: const Icon(Icons.check_circle_outline, size: 18),
+                  tooltip: 'Confirm',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: onConfirm,
+                ),
+              const SizedBox(width: 12),
               IconButton(
                 icon: const Icon(Icons.edit, size: 18),
                 tooltip: 'Edit',
@@ -55,7 +66,7 @@ class TransactionTile extends StatelessWidget {
                 constraints: const BoxConstraints(),
                 onPressed: onEdit,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               IconButton(
                 icon: Icon(
                   Icons.delete_outline,
