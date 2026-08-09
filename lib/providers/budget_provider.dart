@@ -170,6 +170,16 @@ class BudgetProvider extends ChangeNotifier {
     return total;
   }
 
+  List<Transaction> getOverdueUnconfirmedTransactions() {
+    final today = DateTime.now();
+    final startOfToday = DateTime(today.year, today.month, today.day+2);
+
+    return _transactions.where((transaction) {
+      return !transaction.isConfirmed &&
+          transaction.date.isBefore(startOfToday);
+    }).toList();
+  }
+
   /// Returns a list of transactions filtered by category, year, and month, sorted by date
   List<Transaction> getTransactionsForCategoryAndMonth(
     String categoryId,

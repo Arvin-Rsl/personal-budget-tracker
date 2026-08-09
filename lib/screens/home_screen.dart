@@ -73,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
         DateTime.now().month -
         targetMonth;
     final bool isPreviousMonth = monthsAgo == 1;
+    final overdueTransactions = provider.getOverdueUnconfirmedTransactions();
 
     return Scaffold(
       appBar: AppBar(
@@ -213,6 +214,88 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (overdueTransactions.isNotEmpty) ...[
+              Card(
+                color: Theme.of(context).colorScheme.tertiaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.event_busy),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${overdueTransactions.length} predicted expense${overdueTransactions.length == 1 ? '' : 's'} need attention',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ...overdueTransactions.map((transaction) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${transaction.description} — \$${transaction.amount.toStringAsFixed(2)}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.check_circle_outline,
+                                  size: 20,
+                                ),
+                                tooltip: 'Confirm',
+                                onPressed: () => _confirmTransaction(
+                                  context,
+                                  transaction.id,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 20),
+                                tooltip: 'Edit/Reschedule',
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (context) => TransactionForm(
+                                      currentViewedMonth: _inspectedMonth,
+                                      transactionToEdit: transaction,
+                                      onDateChanged: (newMonth) {
+                                        setState(() {
+                                          _inspectedMonth = newMonth;
+                                        });
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  size: 20,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                                tooltip: 'Delete',
+                                onPressed: () {
+                                  provider.deleteTransaction(transaction.id);
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             if (isPreviousMonth && !isClosed) ...[
               Card(
                 color: Theme.of(context).colorScheme.secondaryContainer,
@@ -642,4 +725,76 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+}
+
+Future<void> _confirmTransaction(
+  BuildContext context,
+  String transactionId,
+) async {
+  final provider = BudgetState.of(context);
+  final transaction = provider.transactions.firstWhere(
+    (t) => t.id == transactionId,
+  );
+  final year = transaction.date.year;
+  final month = transaction.date.month;
+
+  final allocated = provider.getAllocatedBudgetForCategoryAndMonth(
+    transaction.categoryId,
+    year,
+    month,
+  );
+  final alreadySpent = provider.getAmountSpentForCategoryAndMonth(
+    transaction.categoryId,
+    year,
+    month,
+  );
+  final shortfall = (alreadySpent + transaction.amount) - allocated;
+
+  if (shortfall > 0) {
+    final monthIsClosed = provider.isMonthClosed(year, month);
+    final unallocated = provider.getUnallocatedFundsBalance();
+    final canTopUp = !monthIsClosed && unallocated >= shortfall;
+
+    final bool? choice = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Over Budget'),
+          content: Text(
+            canTopUp
+                ? 'Confirming this expense goes \$${shortfall.toStringAsFixed(2)} over '
+                      'budget for this category. Cover it from Unallocated Funds?'
+                : 'Confirming this expense goes \$${shortfall.toStringAsFixed(2)} over '
+                      'budget for this category, and there isn\'t enough in Unallocated '
+                      'Funds to cover it.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            if (canTopUp)
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Cover Shortfall'),
+              ),
+          ],
+        );
+      },
+    );
+
+    if (choice != true) return;
+
+    provider.addTransfer(
+      shortfall,
+      DateTime.now(),
+      FundPool.unallocatedFunds,
+      FundPool.categoryBudget,
+      categoryId: transaction.categoryId,
+      year: year,
+      month: month,
+    );
+  }
+
+  provider.confirmTransaction(transactionId);
 }
