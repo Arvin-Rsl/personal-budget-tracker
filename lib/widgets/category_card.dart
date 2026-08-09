@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/budget_models.dart';
 import 'transaction_tile.dart';
 
+// TODO: sort transactions predicted-first before rendering
 class CategoryCard extends StatelessWidget {
   final Category category;
   final double allocatedBudget;

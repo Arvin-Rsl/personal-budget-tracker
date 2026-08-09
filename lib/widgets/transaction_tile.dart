@@ -3,6 +3,7 @@ import 'package:personal_budget_app/app.dart';
 import '../models/budget_models.dart';
 import '../utils/date_format_option.dart';
 
+// TODO: show Confirm action for predicted expenses, use tertiary/warning color for predicted amount instead of error color
 class TransactionTile extends StatelessWidget {
   final Transaction transaction;
   final VoidCallback onEdit;
