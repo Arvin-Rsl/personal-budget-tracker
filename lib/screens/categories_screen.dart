@@ -123,8 +123,10 @@ class CategoriesScreen extends StatelessWidget {
         return AlertDialog(
           title: const Text('Delete Category?'),
           content: Text(
-            'Deleting "${category.name}" will move any unspent budget '
-            'allocated to it back to Unallocated Funds. This can\'t be undone.',
+            'Deleting "${category.name}" will move its confirmed expenses to '
+            '"Other" and cancel any of its predicted expenses. Any unused '
+            'allocated budget will be returned to Unallocated Funds. This '
+            'can\'t be undone.',
           ),
           actions: [
             TextButton(
@@ -183,7 +185,8 @@ class CategoriesScreen extends StatelessWidget {
                   ),
                 ] else
                   Tooltip(
-                    message: 'The "Other" category cannot be renamed or deleted',
+                    message:
+                        'The "Other" category cannot be renamed or deleted',
                     child: Icon(
                       Icons.lock_outline,
                       size: 20,
