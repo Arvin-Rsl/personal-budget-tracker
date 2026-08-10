@@ -3,13 +3,16 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
+
 // TODO: Add fixed-id "Other" category, always last in the list,
-  // not deletable, new categories insert before it
+// not deletable, new categories insert before it
 // TODO: deleteCategory() - reassign confirmed transactions to
-  // "Other" (with matching two-hop budget transfers per affected
-  // month), delete predicted transactions, then existing
-  // current/previous-month leftover-budget refund logic
+// "Other" (with matching two-hop budget transfers per affected
+// month), delete predicted transactions, then existing
+// current/previous-month leftover-budget refund logic
 class BudgetProvider extends ChangeNotifier {
+  static const String otherCategoryId = 'other';
+
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
     Category(id: '2', name: 'Student Fees'),
@@ -21,6 +24,7 @@ class BudgetProvider extends ChangeNotifier {
     Category(id: '8', name: 'Tech Services (Internet, Phone, etc.)'),
     Category(id: '9', name: 'Clubs, Recreation'),
     Category(id: '10', name: 'Having Fun, Social Activities'),
+    Category(id: otherCategoryId, name: 'Other'),
   ];
   List<Transaction> _transactions = [];
   List<Income> _incomes = [];
@@ -325,8 +329,11 @@ class BudgetProvider extends ChangeNotifier {
       debugPrint("addCategory: a category named \"$name\" already exists");
       return;
     }
+
     final newCategory = Category(id: DateTime.now().toString(), name: name);
-    _categories.add(newCategory);
+    final otherIndex = _categories.indexWhere((c) => c.id == otherCategoryId);
+    _categories.insert(otherIndex, newCategory);
+
     _saveData();
     notifyListeners();
   }
@@ -347,10 +354,75 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   void deleteCategory(String categoryId) {
+    if (categoryId == otherCategoryId) {
+      debugPrint(
+        "deleteCategory: the Other category cannot be deleted",
+      ); // TODO: UI Later
+      return;
+    }
+
     final now = DateTime.now();
+
+    // Figure out, per affected month, how much confirmed spending will move to Other
+    final Map<String, double> spentToMovePerMonth = {};
+    for (final transaction in _transactions) {
+      if (transaction.categoryId == categoryId && transaction.isConfirmed) {
+        final key = _monthKey(transaction.date.year, transaction.date.month);
+        spentToMovePerMonth[key] =
+            (spentToMovePerMonth[key] ?? 0) + transaction.amount;
+      }
+    }
+
+    // Reassign confirmed transactions to Other; delete predicted ones
+    for (final transaction in _transactions) {
+      if (transaction.categoryId == categoryId && transaction.isConfirmed) {
+        transaction.categoryId = otherCategoryId;
+        transaction.description += ' (transferred to Other)';
+      }
+    }
+    _transactions.removeWhere(
+      (transaction) =>
+          !transaction.isConfirmed && transaction.categoryId == categoryId,
+    );
+
+    // Move that spending's budget attribution from this category to Other,
+    // via two chained transfers through Unallocated Funds
+    for (final entry in spentToMovePerMonth.entries) {
+      final parts = entry.key.split('-');
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final amount = entry.value;
+
+      _transfers.add(
+        Transfer(
+          id: '${now.toIso8601String()}_delete_defund_${entry.key}',
+          amount: amount,
+          date: now,
+          from: FundPool.categoryBudget,
+          to: FundPool.unallocatedFunds,
+          categoryId: categoryId,
+          year: year,
+          month: month,
+        ),
+      );
+      _transfers.add(
+        Transfer(
+          id: '${now.toIso8601String()}_delete_refund_other_${entry.key}',
+          amount: amount,
+          date: now,
+          from: FundPool.unallocatedFunds,
+          to: FundPool.categoryBudget,
+          categoryId: otherCategoryId,
+          year: year,
+          month: month,
+        ),
+      );
+    }
+
+    // Existing logic: refund any still-unspent allocated budget in
+    // current/still-open-previous month back to Unallocated Funds
     final currentYear = now.year;
     final currentMonth = now.month;
-
     final previousMonthDate = DateTime(currentYear, currentMonth - 1);
     final previousYear = previousMonthDate.year;
     final previousMonth = previousMonthDate.month;
@@ -373,9 +445,9 @@ class BudgetProvider extends ChangeNotifier {
       if (remaining > 0) {
         _transfers.add(
           Transfer(
-            id: '${DateTime.now().toIso8601String()}_delete_refund_${year}_$month',
+            id: '${now.toIso8601String()}_delete_refund_${year}_$month',
             amount: remaining,
-            date: DateTime.now(),
+            date: now,
             from: FundPool.categoryBudget,
             to: FundPool.unallocatedFunds,
             categoryId: categoryId,
