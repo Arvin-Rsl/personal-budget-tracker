@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../budget_state.dart';
 import '../models/budget_models.dart';
+import '../providers/budget_provider.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -162,20 +163,33 @@ class CategoriesScreen extends StatelessWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 20),
-                  tooltip: 'Rename',
-                  onPressed: () => _showRenameCategoryDialog(context, category),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.error,
+                if (category.id != BudgetProvider.otherCategoryId) ...[
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, size: 20),
+                    tooltip: 'Rename',
+                    onPressed: () =>
+                        _showRenameCategoryDialog(context, category),
                   ),
-                  tooltip: 'Delete',
-                  onPressed: () => _showDeleteCategoryDialog(context, category),
-                ),
+
+                  IconButton(
+                    icon: Icon(
+                      Icons.delete_outline,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    tooltip: 'Delete',
+                    onPressed: () =>
+                        _showDeleteCategoryDialog(context, category),
+                  ),
+                ] else
+                  Tooltip(
+                    message: 'The "Other" category cannot be renamed or deleted',
+                    child: Icon(
+                      Icons.lock_outline,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
               ],
             ),
           );
