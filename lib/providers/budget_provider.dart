@@ -3,7 +3,12 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
-
+// TODO: Add fixed-id "Other" category, always last in the list,
+  // not deletable, new categories insert before it
+// TODO: deleteCategory() - reassign confirmed transactions to
+  // "Other" (with matching two-hop budget transfers per affected
+  // month), delete predicted transactions, then existing
+  // current/previous-month leftover-budget refund logic
 class BudgetProvider extends ChangeNotifier {
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
