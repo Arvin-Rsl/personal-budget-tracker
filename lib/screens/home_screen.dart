@@ -308,9 +308,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Wrap up this month? Unspent budget moves to Unallocated Funds.',
                   ),
                   trailing: FilledButton(
-                    onPressed: () {
-                      provider.closeMonth(targetYear, targetMonth);
-                    },
+                    onPressed: () =>
+                        _handleCloseMonth(context, targetYear, targetMonth),
+
+                    // provider.closeMonth(targetYear, targetMonth);
                     child: const Text('Wrap up'),
                   ),
                 ),
@@ -571,6 +572,51 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Icon(Icons.add),
             ),
     );
+  }
+
+  Future<void> _handleCloseMonth(
+    BuildContext context,
+    int year,
+    int month,
+  ) async {
+    final provider = BudgetState.of(context);
+    final unconfirmed = provider.getUnconfirmedTransactionsForMonth(
+      year,
+      month,
+    );
+
+    if (unconfirmed.isEmpty) {
+      provider.closeMonth(year, month);
+      return;
+    }
+
+    final bool? shouldClose = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Unhandled Predicted Expenses'),
+          content: Text(
+            'You have ${unconfirmed.length} unconfirmed predicted expense'
+            '${unconfirmed.length == 1 ? '' : 's'} in this month. Closing the '
+            'month will cancel and delete ${unconfirmed.length == 1 ? 'it' : 'them'}.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Close Month and Delete Unconfirmed Expenses'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldClose == true) {
+      provider.closeMonth(year, month, deleteUnconfirmed: true);
+    }
   }
 
   void _showClosedMonthDialog(

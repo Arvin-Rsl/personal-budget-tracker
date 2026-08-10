@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
 // TODO: closeMonth() - if called interactively and month has
-  // unconfirmed predicted transactions, caller must confirm deletion
-  // first (handled in UI layer, not here)
+// unconfirmed predicted transactions, caller must confirm deletion
+// first (handled in UI layer, not here)
 // TODO: _autoCloseOldMonths() - silently delete unconfirmed predicted
-  // transactions in months it sweeps, no prompt
+// transactions in months it sweeps, no prompt
 class BudgetProvider extends ChangeNotifier {
   List<Category> _categories = [
     Category(id: '1', name: 'Food, Groceries'),
@@ -177,11 +177,19 @@ class BudgetProvider extends ChangeNotifier {
 
   List<Transaction> getOverdueUnconfirmedTransactions() {
     final today = DateTime.now();
-    final startOfToday = DateTime(today.year, today.month, today.day+2);
+    final startOfToday = DateTime(today.year, today.month, today.day + 2);
 
     return _transactions.where((transaction) {
       return !transaction.isConfirmed &&
           transaction.date.isBefore(startOfToday);
+    }).toList();
+  }
+
+  List<Transaction> getUnconfirmedTransactionsForMonth(int year, int month) {
+    return _transactions.where((transaction) {
+      return !transaction.isConfirmed &&
+          transaction.date.year == year &&
+          transaction.date.month == month;
     }).toList();
   }
 
@@ -401,7 +409,7 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void closeMonth(int year, int month) {
+  void closeMonth(int year, int month, {bool deleteUnconfirmed = false}) {
     for (final category in _categories) {
       final allocated = getAllocatedBudgetForCategoryAndMonth(
         category.id,
@@ -425,6 +433,15 @@ class BudgetProvider extends ChangeNotifier {
           ),
         );
       }
+    }
+
+    if (deleteUnconfirmed) {
+      _transactions.removeWhere(
+        (transaction) =>
+            !transaction.isConfirmed &&
+            transaction.date.year == year &&
+            transaction.date.month == month,
+      );
     }
 
     _closedMonths.add(_monthKey(year, month));
@@ -454,7 +471,7 @@ class BudgetProvider extends ChangeNotifier {
       final key = _monthKey(targetDate.year, targetDate.month);
 
       if (!_closedMonths.contains(key)) {
-        closeMonth(targetDate.year, targetDate.month);
+        closeMonth(targetDate.year, targetDate.month, deleteUnconfirmed: true);
       }
     }
   }
