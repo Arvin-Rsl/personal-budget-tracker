@@ -4,12 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
-// TODO: Add fixed-id "Other" category, always last in the list,
-// not deletable, new categories insert before it
-// TODO: deleteCategory() - reassign confirmed transactions to
-// "Other" (with matching two-hop budget transfers per affected
-// month), delete predicted transactions, then existing
-// current/previous-month leftover-budget refund logic
+// TODO fix: months before 2 years ago are already open! They should be closed and non-reopenable.
 class BudgetProvider extends ChangeNotifier {
   static const String otherCategoryId = 'other';
 
@@ -357,7 +352,7 @@ class BudgetProvider extends ChangeNotifier {
     if (categoryId == otherCategoryId) {
       debugPrint(
         "deleteCategory: the Other category cannot be deleted",
-      ); // TODO: UI Later
+      );
       return;
     }
 
