@@ -77,17 +77,28 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const SizedBox(width: 8),
-            Text('${monthName(targetMonth)} $targetYear'),
-            if (isClosed) ...[
-              const SizedBox(width: 6),
-              Text(
-                '(Closed)',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+
+            SizedBox(
+              width: 160,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${monthName(targetMonth)} $targetYear',
+                    textAlign: TextAlign.center,
+                  ),
+                  if (isClosed)
+                    Text(
+                      '(Closed)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
               ),
-            ],
+            ),
+
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.chevron_right, size: 24),
