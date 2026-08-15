@@ -180,7 +180,7 @@ class _TransferFormState extends State<TransferForm> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () {
+              onPressed: () async {
                 final double? inputAmount = double.tryParse(
                   _amountController.text,
                 );
@@ -191,6 +191,32 @@ class _TransferFormState extends State<TransferForm> {
                   });
                   return;
                 }
+                if (needsCategoryPicker &&
+                    provider.isMonthTooOldToEdit(
+                      _selectedYear,
+                      _selectedMonth,
+                    )) {
+                  await showDialog(
+                    context: context,
+                    builder: (dialogContext) {
+                      return AlertDialog(
+                        title: const Text('Month Too Old'),
+                        content: Text(
+                          '${monthName(_selectedMonth)} $_selectedYear is more than 2 years in '
+                          'the past and can no longer receive allocations.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  return;
+                }
+
                 if (needsCategoryPicker &&
                     provider.isMonthClosed(_selectedYear, _selectedMonth)) {
                   _showClosedMonthWarning(context, provider, inputAmount);

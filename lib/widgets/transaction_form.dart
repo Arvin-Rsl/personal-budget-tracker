@@ -229,6 +229,28 @@ class _TransactionFormState extends State<TransactionForm> {
                 final int targetYear = _selectedDate.year;
                 final int targetMonth = _selectedDate.month;
 
+                if (provider.isMonthTooOldToEdit(targetYear, targetMonth)) {
+                  await showDialog(
+                    context: context,
+                    builder: (dialogContext) {
+                      return AlertDialog(
+                        title: const Text('Month Too Old'),
+                        content: Text(
+                          '${monthName(targetMonth)} $targetYear is more than 2 years in the '
+                          'past and can no longer be edited.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  return;
+                }
+
                 bool monthIsClosed = provider.isMonthClosed(
                   targetYear,
                   targetMonth,

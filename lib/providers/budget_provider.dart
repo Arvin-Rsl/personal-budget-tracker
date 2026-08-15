@@ -43,6 +43,15 @@ class BudgetProvider extends ChangeNotifier {
     _loadData();
   }
 
+  int _monthsAgo(int year, int month) {
+    final now = DateTime.now();
+    return 12 * (now.year - year) + (now.month - month);
+  }
+
+  bool isMonthTooOldToEdit(int year, int month) {
+    return _monthsAgo(year, month) > 24;
+  }
+
   double getUnallocatedFundsBalance() {
     double balance = 0.0;
 
@@ -350,9 +359,7 @@ class BudgetProvider extends ChangeNotifier {
 
   void deleteCategory(String categoryId) {
     if (categoryId == otherCategoryId) {
-      debugPrint(
-        "deleteCategory: the Other category cannot be deleted",
-      );
+      debugPrint("deleteCategory: the Other category cannot be deleted");
       return;
     }
 
@@ -516,14 +523,10 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   void reopenMonth(int year, int month) {
-    final monthsAgo =
-        12 * (DateTime.now().year - year) + DateTime.now().month - month;
-
-    if (monthsAgo > 24) {
+    if (isMonthTooOldToEdit(year, month)) {
       debugPrint("reopenMonth: cannot reopen month older than 2 years ago");
       return;
     }
-
     _closedMonths.remove(_monthKey(year, month));
     _saveData();
     notifyListeners();
