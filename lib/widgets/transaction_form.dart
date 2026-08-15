@@ -4,40 +4,7 @@ import '../models/budget_models.dart';
 import '../providers/budget_provider.dart';
 import '../app.dart';
 import '../utils/date_format_option.dart';
-
-const List<String> _monthAbbreviations = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
-const List<String> _monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
-String getMonthAbbreviation(int month) {
-  return _monthAbbreviations[month - 1];
-}
+import '../utils/months.dart';
 
 class TransactionForm extends StatefulWidget {
   final DateTime currentViewedMonth;
@@ -190,7 +157,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
-                        '💡 Saving will switch view to month ${getMonthAbbreviation(_selectedDate.month)}/${_selectedDate.year}',
+                        '💡 Saving will switch view to month ${monthAbbreviation(_selectedDate.month)}/${_selectedDate.year}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.primary,
@@ -486,7 +453,7 @@ Future<bool> _showClosedMonthReopenDialog(
       return AlertDialog(
         title: const Text('Month is Closed'),
         content: Text(
-          '${_monthNames[month - 1]} $year is closed. You can\'t add an expense to '
+          '${monthNames[month - 1]} $year is closed. You can\'t add an expense to '
           'a closed month. Reopen it?',
         ),
         actions: [

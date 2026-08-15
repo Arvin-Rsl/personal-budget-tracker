@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../budget_state.dart';
 import '../models/budget_models.dart';
 import '../providers/budget_provider.dart';
+import '../utils/months.dart';
 
 class TransferForm extends StatefulWidget {
   final FundPool sourcePool;
@@ -27,21 +28,6 @@ class _TransferFormState extends State<TransferForm> {
   int _selectedMonth = DateTime.now().month;
 
   String? _amountError;
-
-  static const MONTHS = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
 
   @override
   void initState() {
@@ -159,7 +145,7 @@ class _TransferFormState extends State<TransferForm> {
                   items: List.generate(12, (index) {
                     return DropdownMenuItem(
                       value: index + 1,
-                      child: Text(MONTHS[index]),
+                      child: Text(monthNames[index]),
                     );
                   }),
                   onChanged: (int? newValue) {
@@ -231,7 +217,7 @@ class _TransferFormState extends State<TransferForm> {
         return AlertDialog(
           title: const Text('Month is Closed'),
           content: Text(
-            '${MONTHS[_selectedMonth - 1]} $_selectedYear is closed. You can\'t '
+            '${monthNames[_selectedMonth - 1]} $_selectedYear is closed. You can\'t '
             'allocate money to a closed month. Reopen it?',
           ),
           actions: [

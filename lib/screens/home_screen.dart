@@ -8,6 +8,7 @@ import '../widgets/category_card.dart';
 import '../widgets/income_form.dart';
 import '../widgets/transaction_form.dart';
 import 'categories_screen.dart';
+import '../utils/months.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,25 +20,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   DateTime _inspectedMonth = DateTime.now();
   String? _expandedCategoryId;
-
-  static const MONTHS = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
-  String _getMonthName(int month) {
-    return MONTHS[month - 1];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const SizedBox(width: 8),
-            Text('${_getMonthName(targetMonth)} $targetYear'),
+            Text('${monthName(targetMonth)} $targetYear'),
             if (isClosed) ...[
               const SizedBox(width: 6),
               Text(
@@ -302,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.event_busy),
                   title: Text(
-                    '${_getMonthName(targetMonth)} $targetYear has ended',
+                    '${monthName(targetMonth)} $targetYear has ended',
                   ),
                   subtitle: const Text(
                     'Wrap up this month? Unspent budget moves to Unallocated Funds.',
@@ -634,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return AlertDialog(
           title: const Text('Month Closed'),
           content: Text(
-            '${_getMonthName(month)} $year has been closed. Any unspent '
+            '${monthName(month)} $year has been closed. Any unspent '
             'budget was moved to Unallocated Funds.',
           ),
           actions: [
@@ -676,7 +658,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     items: List.generate(12, (index) {
                       return DropdownMenuItem(
                         value: index + 1,
-                        child: Text(MONTHS[index]),
+                        child: Text(monthNames[index]),
                       );
                     }),
                     onChanged: (int? newValue) {
