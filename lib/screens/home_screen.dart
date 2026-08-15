@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
         targetMonth,
       );
     }
-
+    final bool isTooOld = provider.isMonthTooOldToEdit(targetYear, targetMonth);
     final bool isClosed = provider.isMonthClosed(targetYear, targetMonth);
     final int monthsAgo =
         (DateTime.now().year - targetYear) * 12 +
@@ -548,7 +548,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: isClosed
+      floatingActionButton: isTooOld
+          ? null
+          : isClosed
           ? FloatingActionButton(
               tooltip: 'Month Closed',
               onPressed: () => _showClosedMonthDialog(
