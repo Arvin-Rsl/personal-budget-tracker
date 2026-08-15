@@ -45,7 +45,6 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double budget = allocatedBudget;
-    final double percentSpent = budget > 0 ? (spentAmount / budget) : 0.0;
     final sortedTransactions = [...transactions]
       ..sort((a, b) {
         if (a.isConfirmed != b.isConfirmed) {
@@ -93,17 +92,6 @@ class CategoryCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              // LinearProgressIndicator(
-              //   value: percentSpent.clamp(0.0, 1.0),
-              //   minHeight: 8,
-              //   borderRadius: BorderRadius.circular(4),
-              //   backgroundColor: Theme.of(
-              //     context,
-              //   ).colorScheme.surfaceContainerHighest,
-              //   color: isMonthClosed
-              //       ? Theme.of(context).colorScheme.secondary
-              //       : _getProgressColor(context, percentSpent),
-              // ),
               _buildSegmentedProgressBar(context, budget),
               if (isExpanded) ...[
                 const SizedBox(height: 16),
@@ -160,7 +148,9 @@ class CategoryCard extends StatelessWidget {
     final Color spentColor = isMonthClosed
         ? Theme.of(context).colorScheme.primary
         : _getProgressColor(context, spentAmount / (budget > 0 ? budget : 1));
-    final Color predictedColor = Theme.of(context).colorScheme.onSecondaryFixedVariant;
+    final Color predictedColor = Theme.of(
+      context,
+    ).colorScheme.onSecondaryFixedVariant;
     final Color emptyColor = Theme.of(
       context,
     ).colorScheme.surfaceContainerHighest;
