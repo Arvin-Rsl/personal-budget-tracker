@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_budget_app/models/budget_models.dart';
 
-// TODO fix: months before 2 years ago are already open! They should be closed and non-reopenable.
 class BudgetProvider extends ChangeNotifier {
   static const String otherCategoryId = 'other';
 
@@ -185,7 +184,7 @@ class BudgetProvider extends ChangeNotifier {
 
   List<Transaction> getOverdueUnconfirmedTransactions() {
     final today = DateTime.now();
-    final startOfToday = DateTime(today.year, today.month, today.day + 2);
+    final startOfToday = DateTime(today.year, today.month, today.day + 2); // TODO: remove +2 after testing
 
     return _transactions.where((transaction) {
       return !transaction.isConfirmed &&
