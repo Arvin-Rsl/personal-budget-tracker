@@ -87,7 +87,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     '${monthName(targetMonth)} $targetYear',
                     textAlign: TextAlign.center,
                   ),
-                  if (isClosed)
+                  if (isTooOld)
+                    Text(
+                      '(Too Old)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  if (isClosed && !isTooOld)
                     Text(
                       '(Closed)',
                       style: TextStyle(
