@@ -10,6 +10,8 @@ import '../widgets/transaction_form.dart';
 import 'categories_screen.dart';
 import '../utils/months.dart';
 
+// TODO: Extract MonthNavigationHeader, HomeDrawer, OverduePredictionsBanner, MonthCloseBanner, BudgetSummaryCard into their own widget files
+// TODO: Deduplicate _confirmTransaction (currently defined twice)
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
