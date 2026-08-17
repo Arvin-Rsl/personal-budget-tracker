@@ -49,7 +49,7 @@ class BudgetSummaryCard extends StatelessWidget {
                 _SummaryFigure(
                   label: 'Predicted',
                   value: totalPredicted,
-                  color: Colors.orange.shade700,
+                  color: Theme.of(context).colorScheme.secondary
                 ),
               ],
             ),
