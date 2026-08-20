@@ -5,14 +5,25 @@ import 'screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'utils/date_format_option.dart';
 
-// TODO: finalize color choices (maybe check the UX Book on Colors too) and name artistically!
+// TODO: finalize color choices and name artistically!
 
 enum AppThemeColor {
   teal('Teal', Colors.teal),
-  purple('Purple', Colors.purple),
-  orange('Orange', Colors.orange),
+  cyan('Cyan', Colors.cyan),
+  lightBLue('Light Blue', Colors.lightBlue),
+  blue('Blue', Colors.blue),
+  blueGrey('Blue Grey', Colors.blueGrey),
   indigo('Indigo', Colors.indigo),
+  deepPurple('Deep Purple', Colors.deepPurple),
+  purple('Purple', Colors.purple),
+  pink('Pink', Colors.pink),
+  red('Red', Colors.red),
+  brown('Brown', Colors.brown),
+  deepOrange('Deep Orange', Colors.deepOrange),
+  orange('Orange', Colors.orange),
+  amber('Amber', Colors.amber),
   lime('Lime', Colors.lime),
+  lightGreen('Light Green', Colors.lightGreen),
   green('Green', Colors.green);
 
   final String label;
