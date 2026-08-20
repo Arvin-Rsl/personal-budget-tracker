@@ -124,8 +124,8 @@ class CategoriesScreen extends StatelessWidget {
           title: const Text('Delete Category?'),
           content: Text(
             'Deleting "${category.name}" will move its confirmed expenses to '
-            '"Other" and cancel any of its predicted expenses. Any unused '
-            'allocated budget will be returned to Unallocated Funds. This '
+            '"Other" and cancel any of its predicted expenses. \nAny unused '
+            'allocated budget will be returned to Unallocated Funds. \n\nThis '
             'can\'t be undone.',
           ),
           actions: [
