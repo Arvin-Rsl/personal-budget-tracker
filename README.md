@@ -4,7 +4,7 @@ A Flutter budgeting app built around real-world envelope budgeting. Instead of j
 against static numbers, it models money like physical cash: income flows into an **Unallocated Funds** pool, gets intentionally assigned to category envelopes each month, and every single move is
 recorded as an auditable ledger entry rather than a silently updated total.
 
-I built this as a personal project right before starting university. I wanted to build healthier
+I built this as a personal project right before starting uni. I wanted to build healthier
 financial habits, and frankly, I figured: why settle for a boring Excel sheet when I can build
 something better? It turned out to be the perfect opportunity to get my finances in order while
 diving deep into Flutter, Dart, and sound application architecture. I'm sharing it open-source for
