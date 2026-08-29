@@ -32,6 +32,9 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+**/GeneratedPluginRegistrant.*
+**/generated_plugin_registrant.*
+devtools_options.yaml
 
 # Symbolication related
 app.*.symbols
