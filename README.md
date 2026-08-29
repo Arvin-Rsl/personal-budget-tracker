@@ -1,8 +1,7 @@
 # Personal Budget Tracker
 
 A Flutter budgeting app built around real-world envelope budgeting. Instead of just logging expenses
-against static numbers, it models money like physical cash: income flows into an **Unallocated Funds
-** pool, gets intentionally assigned to category envelopes each month, and every single move is
+against static numbers, it models money like physical cash: income flows into an **Unallocated Funds** pool, gets intentionally assigned to category envelopes each month, and every single move is
 recorded as an auditable ledger entry rather than a silently updated total.
 
 I built this as a personal project right before starting university. I wanted to build healthier
