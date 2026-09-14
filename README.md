@@ -27,7 +27,7 @@ anyone looking for a more deliberate way to budget.
   automatically moves its past transaction history into a built-in "Other" bucket so your historical
   records stay intact.
 - **Overspend guardrails** — If an expense pushes a category into the red, the app prompts you to
-  cover the gap from Unallocated Funds—or blocks the entry if your pool is empty.
+  cover the gap from Unallocated Funds—or blocks the entry if your pool doesn't have enough funds.
 - **Personalized look & feel** — Full light/dark/system theme support with various accent colors and
   customizable date formats, all saved locally.
 
