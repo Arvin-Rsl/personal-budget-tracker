@@ -105,6 +105,7 @@ This project is actively evolving. Here is what I'm planning to tackle next:
 - Multi-currency support
 - Visual spending trends and historical analytics per category
 - Preset category templates tailored for common lifestyles (students, employee, family, etc.)
+- Connecting the app to Gmail or banking apps to automatically log expenses and incomes instead of manually adding them. 
 
 ## Tech stack
 
@@ -112,6 +113,21 @@ This project is actively evolving. Here is what I'm planning to tackle next:
 - **Persistence:** `path_provider`, `shared_preferences`
 - No backend, no API keys — all data is stored locally on-device and nothing is synced or backed up
   automatically.
+
+## Challenges
+
+I started this project back home (in Iran), where pub.dev — the official package
+registry for Flutter/Dart — was restricted, and public mirrors caused their
+own dependency-resolution problems. Every `flutter pub get` had to run `--offline`, resolving
+entirely from a local pub cache I had found.
+
+This shaped a few decisions: I checked `flutter pub cache list` before
+adding any new dependency, since a failed offline resolution could leave
+`pubspec.yaml`/`pubspec.lock` broken. I also leaned
+more on Dart's own SDK (`dart:io`, `dart:convert`) instead of reaching for
+extra packages — hand-rolling JSON persistence and date formatting, for
+example — which ended up teaching me more than just importing a package
+would have.
 
 ## Getting started
 
