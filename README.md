@@ -47,7 +47,7 @@ anyone looking for a more deliberate way to budget.
 **Add Income**
 ![Add Income](screenshots/add_income.png)
 
-**Add Expense**
+**Add Expense (with inline errors)**
 ![Add Expense](screenshots/add_expense_inline_err.png)
 
 ### Month lifecycle
