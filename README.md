@@ -1,7 +1,8 @@
 # Personal Budget Tracker
 
 A Flutter budgeting app built around real-world envelope budgeting. Instead of just logging expenses
-against static numbers, it models money like physical cash: income flows into an **Unallocated Funds** pool, gets intentionally assigned to category envelopes each month, and every single move is
+against static numbers, it models money like physical cash: income flows into an **Unallocated Funds
+** pool, gets intentionally assigned to category envelopes each month, and every single move is
 recorded as an auditable ledger entry rather than a silently updated total.
 
 I built this as a personal project right before starting uni. I wanted to build healthier
@@ -30,6 +31,46 @@ anyone looking for a more deliberate way to budget.
   cover the gap from Unallocated Funds—or blocks the entry if your pool is empty.
 - **Personalized look & feel** — Full light/dark/system theme support with various accent colors and
   customizable date formats, all saved locally.
+
+## Screenshots
+
+### Home & navigation
+
+| Home screen                                        | Menu                                 | Monthly Transaction History for Category                                                                  |
+|----------------------------------------------------|--------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| ![Home screen](screenshots/home_screen_sample.png) | ![Menu](screenshots/menu_drawer.png) | ![Transaction hitory sample (Food, Groceries for September)](screenshots/transactions_history_sample.png) |
+
+### Categories
+
+| Categories screen                                       | Renaming a category                                   |
+|---------------------------------------------------------|-------------------------------------------------------|
+| ![Categories screen](screenshots/categories_screen.png) | ![Renaming category](screenshots/rename_category.png) |
+
+| Deleting a category                                     | Duplicate category name                                                                    |
+|---------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| ![Delete category](screenshots/delete_category_msg.png) | ![Duplicate category message](screenshots/err_msg_duplicate_category_case_insensitive.png) |
+
+### Unallocated Funds & Savings
+
+| Unallocated Funds                                              | Savings                                    |
+|----------------------------------------------------------------|--------------------------------------------|
+| ![Unallocated Funds](screenshots/unallocated_funds_screen.png) | ![Savings](screenshots/savings_screen.png) |
+
+### Month lifecycle
+
+| Wrap up month                                   | Month closed                                  | Reopen month                                  |
+|-------------------------------------------------|-----------------------------------------------|-----------------------------------------------|
+| ![Wrap up month](screenshots/wrap_up_month.png) | ![Month closed](screenshots/closed_month.png) | ![Reopen month](screenshots/reopen_month.png) |
+
+### Budget guardrails
+
+| Overbudget — cover shortfall                                  | Overbudget — predicted expense                                        | Overbudget — can't cover                                                  |
+|---------------------------------------------------------------|-----------------------------------------------------------------------|---------------------------------------------------------------------------|
+| ![Overbudget cover shortfall](screenshots/overbudget_msg.png) | ![Overbudget predicted](screenshots/overbudget_msg_for_predicted.png) | ![Too expensive, insufficient funds](screenshots/very_overbudget_err.png) |
+
+### Settings
+
+![Settings](screenshots/settings_screen.png)
 
 ## What's next
 
