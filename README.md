@@ -105,7 +105,8 @@ This project is actively evolving. Here is what I'm planning to tackle next:
 - Multi-currency support
 - Visual spending trends and historical analytics per category
 - Preset category templates tailored for common lifestyles (students, employee, family, etc.)
-- Connecting the app to Gmail or banking apps to automatically log expenses and incomes instead of manually adding them. 
+- Connecting the app to Gmail or banking apps to automatically log expenses and incomes instead of manually adding them.
+- Renaming the project! Something like _Budge Buddy_, maybe. :grin:
 
 ## Tech stack
 
